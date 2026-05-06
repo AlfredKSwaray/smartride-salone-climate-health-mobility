@@ -1,4 +1,4 @@
-# 🛣️ SMARTRIDE SALONE
+#  SMARTRIDE SALONE
 ### Climate-Resilient Mobility Intelligence Platform · Sierra Leone
 
 [![Status](https://img.shields.io/badge/status-prototype-orange)]()
@@ -9,7 +9,7 @@
 
 ---
 
-## 🌍 The Problem
+##  The Problem
 
 Sierra Leone faces increasing climate-related disruptions — flooding and heavy rainfall that severely impact transportation and delay access to healthcare. Vulnerable communities, especially children, face life-threatening delays when roads are blocked and there is no real-time information to guide safer movement.
 
@@ -23,11 +23,11 @@ SMARTRIDE SALONE is a GPS-based mobility intelligence platform that:
 - **Tracks healthcare facility accessibility** during climate disruptions
 - **Logs GPS route data** to build a growing mobility dataset
 
-## 🖥️ Live Prototype
+##  Live Prototype
 
 **[→ View Live Demo](https://smartride-salone-climate-health-mobility.onrender.com)**
 
-## 🛠️ Technologies
+##  Technologies
 
 | Layer | Technology |
 |---|---|
@@ -39,7 +39,7 @@ SMARTRIDE SALONE is a GPS-based mobility intelligence platform that:
 | Future: Backend | FastAPI + PostGIS |
 | Future: Mobile | React Native (Android-first) |
 
-## 🗂️ Repository Structure
+##  Repository Structure
 
 ```
 smartride-salone/
@@ -48,7 +48,7 @@ smartride-salone/
 └── render.yaml         # Render deployment config
 ```
 
-## 🚀 Running Locally
+##  Running Locally
 
 No build step required. Just open `index.html` in any browser:
 
@@ -58,7 +58,7 @@ cd smartride-salone
 open index.html
 ```
 
-## 🌐 Deploying to Render
+##  Deploying to Render
 
 1. Push this repo to GitHub
 2. Go to [render.com](https://render.com) → New → Static Site
@@ -68,7 +68,7 @@ open index.html
 
 Or use the included `render.yaml` for automatic configuration.
 
-## 📍 Prototype Features (v0.1)
+##  Prototype Features (v0.1)
 
 - [x] Interactive map centered on Freetown, Sierra Leone
 - [x] Color-coded route overlays (safe / caution / blocked)
@@ -81,7 +81,7 @@ Or use the included `render.yaml` for automatic configuration.
 - [x] Analytics dashboard (mobility data overview)
 - [x] Mobile-responsive layout
 
-## 🔮 12-Month Roadmap
+##  12-Month Roadmap
 
 - [ ] Mobile app (Android-first via React Native)
 - [ ] Real-time flood data integration (GloFAS API)
@@ -91,18 +91,18 @@ Or use the included `render.yaml` for automatic configuration.
 - [ ] Pilot testing in flood-prone communities
 - [ ] Partnerships with health and transport stakeholders
 
-## 🤝 Team
+##  Team
 
 A multidisciplinary team of 5 working across software development, finance, communications, and community engagement — with direct field experience supporting vulnerable children in Sierra Leone.
 
-## 🌱 Alignment
+##  Alignment
 
 - **Digital Public Goods** — Open-source, designed for low-resource settings
 - **SDG 3** — Good Health & Well-Being
 - **SDG 11** — Sustainable Cities & Communities
 - **SDG 13** — Climate Action
 
-## 📄 License
+##  License
 
 MIT License — open for adaptation and reuse.
 
