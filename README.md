@@ -25,7 +25,7 @@ SMARTRIDE SALONE is a GPS-based mobility intelligence platform that:
 
 ## 🖥️ Live Prototype
 
-**[→ View Live Demo](https://smartride-salone.onrender.com)**
+**[→ View Live Demo](https://smartride-salone-climate-health-mobility.onrender.com)**
 
 ## 🛠️ Technologies
 
