@@ -106,6 +106,6 @@ A multidisciplinary team of 5 working across software development, finance, comm
 
 MIT License — open for adaptation and reuse.
 
----
+----
 
-*SMARTRIDE SALONE · Prototype v0.1 · 2025*
+*SMARTRIDE SALONE · Prototype v0.1 · 2025* 
