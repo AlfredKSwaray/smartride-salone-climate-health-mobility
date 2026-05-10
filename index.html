@@ -1177,7 +1177,7 @@ async function submitReport() {
   btn.disabled = true;
 
   // Save to Supabase
-  const { error } = await db.from('reports').insert({ location: loc, type, detail });
+  const { error } = await dbInsert('reports', { location: loc, type, detail });
   btn.textContent = '📤 Submit Report';
   btn.disabled = false;
 
@@ -1243,7 +1243,7 @@ function addReportToUI(r, prepend = false) {
 
 // ── LOAD SAVED REPORTS FROM SUPABASE ──
 async function loadReports() {
-  const { data, error } = await db.from('reports').select('*').order('created_at', { ascending: false }).limit(20);
+  const { data, error } = await dbSelect('reports', 'order=created_at.desc&limit=20');
   if (error || !data || data.length === 0) return;
   document.getElementById('reports-list').innerHTML = '';
   reportCount = 7 + data.length;
