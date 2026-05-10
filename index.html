@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -29,396 +32,216 @@
       --border:   #1f3a28;
       --text:     #e8f0eb;
       --text-dim: #7a9a83;
-      --white:    #ffffff;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      background: var(--bg); color: var(--text);
+      height: 100vh; overflow: hidden;
+      display: flex; flex-direction: column;
     }
 
-    /* ── HEADER ── */
+    /* HEADER */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      height: 56px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 56px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; z-index: 1000;
     }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .logo { display: flex; align-items: center; gap: 10px; }
     .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--green);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      width: 32px; height: 32px; background: var(--green);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px;
     }
-    .logo-text {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 15px;
-      letter-spacing: 0.04em;
-    }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.04em; }
     .logo-text span { color: var(--green-lt); }
-
-    .header-center {
-      display: flex;
-      gap: 6px;
-    }
+    .header-center { display: flex; gap: 6px; }
     .tab-btn {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all .2s;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border); background: transparent; color: var(--text-dim);
+      cursor: pointer; transition: all .2s;
     }
     .tab-btn.active, .tab-btn:hover {
-      background: var(--green-dim);
-      border-color: var(--green);
-      color: var(--text);
+      background: var(--green-dim); border-color: var(--green); color: var(--text);
     }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .live-badge { display: flex; align-items: center; gap: 6px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--green-lt); }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-lt); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(1.3);} }
+    .weather-chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(214,58,47,.15); border: 1px solid rgba(214,58,47,.35); color: #f07870; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    /* EMERGENCY BANNER */
+    #emergency-banner {
+      display: none; align-items: center; gap: 12px;
+      background: rgba(214,58,47,.12); border-bottom: 1px solid rgba(214,58,47,.4);
+      padding: 10px 20px; font-size: 13px; color: #f07870; flex-shrink: 0;
     }
-    .live-badge {
-      display: flex; align-items: center; gap: 6px;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      color: var(--green-lt);
-    }
-    .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--green-lt);
-      animation: pulse 1.8s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: .4; transform: scale(1.3); }
-    }
-    .weather-chip {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(214,58,47,.15);
-      border: 1px solid rgba(214,58,47,.35);
-      color: #f07870;
-    }
+    #emergency-banner.show { display: flex; animation: slideDown .4s ease; }
+    @keyframes slideDown { from{transform:translateY(-100%);opacity:0;} to{transform:translateY(0);opacity:1;} }
+    #emergency-banner strong { color: var(--text); }
+    .banner-close { margin-left: auto; cursor: pointer; opacity: .6; font-size: 18px; line-height: 1; }
+    .banner-close:hover { opacity: 1; }
 
-    /* ── MAIN LAYOUT ── */
-    .main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    /* PAGE SHELLS */
+    .page { display: none; flex: 1; overflow: hidden; }
+    .page.active { display: flex; }
+    #page-analytics.active, #page-about.active { flex-direction: column; overflow-y: auto; padding: 32px; }
 
-    /* ── SIDEBAR ── */
+    /* SIDEBAR */
     .sidebar {
-      width: 300px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      flex-shrink: 0;
+      width: 300px; background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
     }
     .sidebar::-webkit-scrollbar { width: 4px; }
-    .sidebar::-webkit-scrollbar-track { background: transparent; }
     .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .sidebar-section {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-    }
+    .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
     .section-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 12px;
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.12em; color: var(--text-dim);
+      text-transform: uppercase; margin-bottom: 12px;
     }
-
-    /* stat cards */
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .stat-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-    .stat-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
     .stat-lbl { font-size: 11px; color: var(--text-dim); }
-    .green { color: var(--green-lt); }
-    .amber { color: var(--amber); }
-    .red   { color: var(--red); }
-    .blue  { color: var(--blue-lt); }
-
-    /* legend */
-    .legend-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 0;
-      font-size: 13px;
-    }
+    .c-green { color: var(--green-lt); } .c-amber { color: var(--amber); } .c-red { color: var(--red); } .c-blue { color: var(--blue-lt); }
+    .legend-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; }
     .legend-item + .legend-item { border-top: 1px solid var(--border); }
-    .dot {
-      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-    }
-    .dot-green { background: var(--green-lt); }
-    .dot-amber { background: var(--amber); }
-    .dot-red   { background: var(--red); }
-    .legend-count {
-      margin-left: auto;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-
-    /* controls */
+    .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dot-green{background:var(--green-lt);} .dot-amber{background:var(--amber);} .dot-red{background:var(--red);}
+    .legend-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim); }
     .control-btn {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: left;
-      display: flex; align-items: center; gap: 8px;
-      transition: all .15s;
-      margin-bottom: 6px;
+      width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500; cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 8px; transition: all .15s; margin-bottom: 6px;
     }
     .control-btn:hover { background: var(--green-dim); border-color: var(--green); }
     .control-btn.active { background: var(--green-dim); border-color: var(--green-lt); color: var(--green-lt); }
-    .control-btn .icon { font-size: 15px; }
-
-    /* reports */
-    .report-item {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-bottom: 6px;
-      font-size: 12px;
-    }
-    .report-item-top {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
-    }
-    .report-badge {
-      font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600;
-    }
-    .badge-red   { background: rgba(214,58,47,.2);  color: #f07870; border: 1px solid rgba(214,58,47,.3); }
-    .badge-amber { background: rgba(232,160,32,.2); color: #f0bc60; border: 1px solid rgba(232,160,32,.3); }
-    .badge-green { background: rgba(37,168,104,.2); color: #60d090; border: 1px solid rgba(37,168,104,.3); }
+    .report-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; font-size: 12px; }
+    .report-item-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .report-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+    .badge-red   { background:rgba(214,58,47,.2);  color:#f07870; border:1px solid rgba(214,58,47,.3); }
+    .badge-amber { background:rgba(232,160,32,.2); color:#f0bc60; border:1px solid rgba(232,160,32,.3); }
+    .badge-green { background:rgba(37,168,104,.2); color:#60d090; border:1px solid rgba(37,168,104,.3); }
     .report-time { color: var(--text-dim); font-size: 11px; margin-left: auto; }
     .report-loc  { color: var(--text-dim); font-size: 11px; }
 
-    /* ── MAP ── */
-    #map {
-      flex: 1;
-      z-index: 1;
-    }
-
-    /* Leaflet dark override */
+    /* MAP */
+    #map { flex: 1; z-index: 1; }
     .leaflet-tile { filter: brightness(.75) saturate(.7) hue-rotate(150deg); }
-    .leaflet-control-zoom a {
-      background: var(--surface) !important;
-      color: var(--text) !important;
-      border-color: var(--border) !important;
-    }
-
-    /* ── RIGHT PANEL ── */
-    .right-panel {
-      width: 260px;
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      flex-shrink: 0;
-    }
-    .right-panel::-webkit-scrollbar { width: 4px; }
-    .right-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    /* route detail */
-    .route-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-    .route-card-top {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
-    }
-    .route-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-    }
-    .route-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
-    .route-bar {
-      height: 4px; border-radius: 2px;
-      background: var(--border);
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .route-bar-fill { height: 100%; border-radius: 2px; transition: width .6s; }
-
-    /* GPS button */
-    .gps-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: calc(100% - 32px);
-      margin: 16px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: var(--green);
-      color: white;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all .2s;
-    }
-    .gps-btn:hover { background: var(--green-lt); transform: translateY(-1px); }
-    .gps-btn.tracking { background: var(--red); animation: pulse-btn 1.5s infinite; }
-    @keyframes pulse-btn {
-      0%,100% { box-shadow: 0 0 0 0 rgba(214,58,47,.4); }
-      50%      { box-shadow: 0 0 0 8px rgba(214,58,47,0); }
-    }
-
-    /* report form */
-    .form-group { margin-bottom: 10px; }
-    .form-label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      padding: 7px 10px;
-      outline: none;
-      transition: border-color .15s;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: var(--green);
-    }
-    .form-select option { background: var(--bg); }
-    .form-textarea { resize: vertical; min-height: 60px; }
-    .submit-btn {
-      width: 100%;
-      padding: 9px;
-      border-radius: 6px;
-      border: none;
-      background: var(--green);
-      color: white;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .submit-btn:hover { background: var(--green-lt); }
-
-    /* toast */
-    #toast {
-      position: fixed;
-      bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: var(--green-dim);
-      border: 1px solid var(--green);
-      color: var(--green-lt);
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity .3s;
-      pointer-events: none;
-    }
-    #toast.show { opacity: 1; }
-
-    /* scrollbar for right */
-    .right-panel::-webkit-scrollbar { width: 4px; }
-
-    /* map controls overlay */
-    .map-overlay {
-      position: absolute;
-      top: 12px; right: 12px;
-      z-index: 500;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .leaflet-control-zoom a { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
+    .map-wrap { flex: 1; position: relative; }
+    .map-overlay { position: absolute; top: 12px; right: 12px; z-index: 500; display: flex; flex-direction: column; gap: 6px; }
     .overlay-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 12px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: all .15s;
-      white-space: nowrap;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all .15s; white-space: nowrap;
     }
     .overlay-btn:hover, .overlay-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green-lt); }
 
-    /* map wrapper */
-    .map-wrap {
-      flex: 1;
-      position: relative;
+    /* RIGHT PANEL */
+    .right-panel {
+      width: 260px; background: var(--surface); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
     }
+    .right-panel::-webkit-scrollbar { width: 4px; }
+    .right-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .route-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+    .route-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .route-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+    .route-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+    .route-bar { height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; margin-top: 8px; }
+    .route-bar-fill { height: 100%; border-radius: 2px; }
+    .gps-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: calc(100% - 32px); margin: 16px; padding: 12px; border-radius: 10px; border: none;
+      background: var(--green); color: white;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+      cursor: pointer; transition: all .2s;
+    }
+    .gps-btn:hover { background: var(--green-lt); }
+    .gps-btn.tracking { background: var(--red); animation: pulse-btn 1.5s infinite; }
+    @keyframes pulse-btn { 0%,100%{box-shadow:0 0 0 0 rgba(214,58,47,.4);} 50%{box-shadow:0 0 0 8px rgba(214,58,47,0);} }
+    .form-group { margin-bottom: 10px; }
+    .form-label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 7px 10px; outline: none; transition: border-color .15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--green); }
+    .form-select option { background: var(--bg); }
+    .form-textarea { resize: vertical; min-height: 60px; }
+    .submit-btn {
+      width: 100%; padding: 9px; border-radius: 6px; border: none;
+      background: var(--green); color: white; font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 12px; cursor: pointer; transition: background .15s;
+    }
+    .submit-btn:hover { background: var(--green-lt); }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* ANALYTICS */
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 28px; }
+    .analytics-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .analytics-val { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; }
+    .analytics-lbl { font-size: 13px; color: var(--text-dim); margin-top: 8px; }
+    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .chart-title { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 16px; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .bar-track { flex: 1; width: 100%; background: var(--surface2); border-radius: 4px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .bar-fill { border-radius: 4px; opacity: .85; }
+    .bar-label { font-size: 10px; color: var(--text-dim); }
+    .corridor-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; }
+
+    /* ABOUT */
+    .about-inner { max-width: 720px; margin: 0 auto; }
+    .about-badge { display: inline-block; background: var(--green-dim); border: 1px solid var(--green); color: var(--green-lt); font-size: 11px; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+    .about-headline { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; }
+    .about-headline span { color: var(--green-lt); }
+    .scenario-box { background: var(--surface); border-left: 3px solid var(--green-lt); border-radius: 0 10px 10px 0; padding: 20px 24px; margin-bottom: 24px; }
+    .scenario-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--green-lt); letter-spacing: .1em; margin-bottom: 10px; }
+    .scenario-text { line-height: 1.8; font-size: 14px; }
+    .scenario-punchline { margin-top: 12px; font-size: 14px; color: var(--green-lt); font-weight: 600; }
+    .wow-box { background: linear-gradient(135deg,rgba(26,122,74,.25),rgba(32,102,180,.15)); border: 1px solid var(--green); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .wow-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: .1em; margin-bottom: 10px; }
+    .wow-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .wow-body { color: var(--text-dim); line-height: 1.8; font-size: 14px; }
+    .wow-quote { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--green-lt); }
+    .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-pill-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+    .stat-pill-lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
+    .info-card-title { font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+    .info-card-body { color: var(--text-dim); font-size: 13px; line-height: 1.7; }
+    .urgent-box { background: rgba(214,58,47,.08); border: 1px solid rgba(214,58,47,.3); border-radius: 12px; padding: 24px; text-align: center; margin-top: 4px; }
+    .urgent-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 10px; }
+    .urgent-body { color: var(--text-dim); line-height: 1.8; font-size: 14px; max-width: 520px; margin: 0 auto; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--green-dim); border: 1px solid var(--green); color: var(--green-lt);
+      padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      z-index: 9999; opacity: 0; transition: opacity .3s; pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-icon">🛣️</div>
     <div class="logo-text">SMARTRIDE <span>SALONE</span></div>
   </div>
   <div class="header-center">
-    <button class="tab-btn active" onclick="setTab(this,'map')">Live Map</button>
-    <button class="tab-btn" onclick="setTab(this,'analytics')">Analytics</button>
-    <button class="tab-btn" onclick="setTab(this,'about')">About</button>
+    <button class="tab-btn active" onclick="showTab('map',this)">Live Map</button>
+    <button class="tab-btn" onclick="showTab('analytics',this)">Analytics</button>
+    <button class="tab-btn" onclick="showTab('about',this)">About</button>
   </div>
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>LIVE · Freetown</div>
@@ -426,86 +249,57 @@
   </div>
 </header>
 
-<!-- ── MAIN ── -->
-<div class="main" id="main-map">
+<!-- EMERGENCY BANNER -->
+<div id="emergency-banner">
+  <span>🚨</span>
+  <span id="banner-text"><strong>ROUTE BLOCKED:</strong> Kissy Road flooded — seek alternative via Wilkinson Rd</span>
+  <span class="banner-close" onclick="document.getElementById('emergency-banner').classList.remove('show')">✕</span>
+</div>
 
-  <!-- LEFT SIDEBAR -->
+<!-- PAGE: MAP -->
+<div id="page-map" class="page active">
   <aside class="sidebar">
-
     <div class="sidebar-section">
       <div class="section-label">Network Status</div>
       <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-val green">14</div>
-          <div class="stat-lbl">Safe Routes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val amber">5</div>
-          <div class="stat-lbl">Caution</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val red">3</div>
-          <div class="stat-lbl">Blocked</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val blue" id="report-count">7</div>
-          <div class="stat-lbl">Community Reports</div>
-        </div>
+        <div class="stat-card"><div class="stat-val c-green">14</div><div class="stat-lbl">Safe Routes</div></div>
+        <div class="stat-card"><div class="stat-val c-amber">5</div><div class="stat-lbl">Caution</div></div>
+        <div class="stat-card"><div class="stat-val c-red">3</div><div class="stat-lbl">Blocked</div></div>
+        <div class="stat-card"><div class="stat-val c-blue" id="report-count">7</div><div class="stat-lbl">Community Reports</div></div>
       </div>
     </div>
-
     <div class="sidebar-section">
       <div class="section-label">Route Legend</div>
       <div class="legend-item"><div class="dot dot-green"></div>Safe — Clear passage<span class="legend-count">14</span></div>
       <div class="legend-item"><div class="dot dot-amber"></div>Caution — Partial disruption<span class="legend-count">5</span></div>
       <div class="legend-item"><div class="dot dot-red"></div>Blocked — Avoid<span class="legend-count">3</span></div>
     </div>
-
     <div class="sidebar-section">
       <div class="section-label">Map Layers</div>
-      <button class="control-btn active" id="btn-flood" onclick="toggleLayer('flood',this)">
-        <span class="icon">💧</span> Flood Risk Zones
-      </button>
-      <button class="control-btn active" id="btn-health" onclick="toggleLayer('health',this)">
-        <span class="icon">🏥</span> Health Facilities
-      </button>
-      <button class="control-btn" id="btn-reports" onclick="toggleLayer('reports',this)">
-        <span class="icon">📍</span> Community Reports
-      </button>
+      <button class="control-btn active" onclick="toggleLayer('flood',this)"><span>💧</span> Flood Risk Zones</button>
+      <button class="control-btn active" onclick="toggleLayer('health',this)"><span>🏥</span> Health Facilities</button>
+      <button class="control-btn active" onclick="toggleLayer('reports',this)"><span>📍</span> Community Reports</button>
     </div>
-
-    <div class="sidebar-section" style="flex:1;">
+    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
       <div class="section-label">Recent Reports</div>
       <div id="reports-list">
         <div class="report-item">
-          <div class="report-item-top">
-            <span class="report-badge badge-red">BLOCKED</span>
-            <span class="report-time">8 min ago</span>
-          </div>
+          <div class="report-item-top"><span class="report-badge badge-red">BLOCKED</span><span class="report-time">8 min ago</span></div>
           <div>Wellington Street near market</div>
           <div class="report-loc">📍 East Freetown · Flooding</div>
         </div>
         <div class="report-item">
-          <div class="report-item-top">
-            <span class="report-badge badge-amber">CAUTION</span>
-            <span class="report-time">22 min ago</span>
-          </div>
+          <div class="report-item-top"><span class="report-badge badge-amber">CAUTION</span><span class="report-time">22 min ago</span></div>
           <div>Congo Cross Bridge</div>
           <div class="report-loc">📍 West Freetown · Road damage</div>
         </div>
         <div class="report-item">
-          <div class="report-item-top">
-            <span class="report-badge badge-green">CLEAR</span>
-            <span class="report-time">41 min ago</span>
-          </div>
+          <div class="report-item-top"><span class="report-badge badge-green">CLEAR</span><span class="report-time">41 min ago</span></div>
           <div>Lumley Beach Road</div>
           <div class="report-loc">📍 West End · Confirmed passable</div>
         </div>
         <div class="report-item">
-          <div class="report-item-top">
-            <span class="report-badge badge-red">BLOCKED</span>
-            <span class="report-time">1 hr ago</span>
-          </div>
+          <div class="report-item-top"><span class="report-badge badge-red">BLOCKED</span><span class="report-time">1 hr ago</span></div>
           <div>Kissy Road main junction</div>
           <div class="report-loc">📍 Kissy · Flash flood</div>
         </div>
@@ -513,61 +307,43 @@
     </div>
   </aside>
 
-  <!-- MAP -->
   <div class="map-wrap">
     <div id="map"></div>
     <div class="map-overlay">
-      <button class="overlay-btn" onclick="flyToFreetown()">📍 Center Map</button>
+      <button class="overlay-btn" onclick="map.flyTo(FREETOWN,14,{animate:true,duration:1})">📍 Center Map</button>
       <button class="overlay-btn" id="btn-satellite" onclick="toggleSatellite(this)">🛰 Satellite</button>
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
   <aside class="right-panel">
-
-    <div style="padding:16px; border-bottom:1px solid var(--border);">
+    <div style="padding:16px;border-bottom:1px solid var(--border);">
       <div class="section-label">GPS Tracking</div>
       <button class="gps-btn" id="gps-btn" onclick="toggleGPS()">
-        <span id="gps-icon">📡</span>
-        <span id="gps-label">Start Route Tracking</span>
+        <span id="gps-icon">📡</span><span id="gps-label">Start Route Tracking</span>
       </button>
       <div id="gps-status" style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:8px;min-height:16px;"></div>
     </div>
-
-    <div style="padding:16px; border-bottom:1px solid var(--border);">
+    <div style="padding:16px;border-bottom:1px solid var(--border);">
       <div class="section-label">Key Routes</div>
-
       <div class="route-card">
-        <div class="route-card-top">
-          <div class="route-name">Connaught Hospital</div>
-          <span class="report-badge badge-amber">CAUTION</span>
-        </div>
+        <div class="route-card-top"><div class="route-name">Connaught Hospital</div><span class="report-badge badge-amber">CAUTION</span></div>
         <div class="route-meta">Via Siaka Stevens St · 3.2 km</div>
         <div class="route-meta">ETA ~18 min (delays expected)</div>
         <div class="route-bar"><div class="route-bar-fill" style="width:65%;background:var(--amber);"></div></div>
       </div>
-
       <div class="route-card">
-        <div class="route-card-top">
-          <div class="route-name">Ola During Children's</div>
-          <span class="report-badge badge-green">CLEAR</span>
-        </div>
+        <div class="route-card-top"><div class="route-name">Ola During Children's</div><span class="report-badge badge-green">CLEAR</span></div>
         <div class="route-meta">Via Wilkinson Rd · 4.8 km</div>
         <div class="route-meta">ETA ~12 min</div>
         <div class="route-bar"><div class="route-bar-fill" style="width:90%;background:var(--green-lt);"></div></div>
       </div>
-
       <div class="route-card">
-        <div class="route-card-top">
-          <div class="route-name">Princess Christian MCH</div>
-          <span class="report-badge badge-red">BLOCKED</span>
-        </div>
+        <div class="route-card-top"><div class="route-name">Princess Christian MCH</div><span class="report-badge badge-red">BLOCKED</span></div>
         <div class="route-meta">Via Kissy Rd · 6.1 km</div>
-        <div class="route-meta">Alternative route recommended</div>
+        <div class="route-meta">⚠ Alternative route recommended</div>
         <div class="route-bar"><div class="route-bar-fill" style="width:20%;background:var(--red);"></div></div>
       </div>
     </div>
-
     <div style="padding:16px;">
       <div class="section-label">Report a Road Condition</div>
       <div class="form-group">
@@ -588,496 +364,269 @@
         <label class="form-label">Details (optional)</label>
         <textarea class="form-textarea" id="r-detail" placeholder="Describe what you see..."></textarea>
       </div>
-      <button class="submit-btn" onclick="submitReport()">📤 Submit Report</button>
+      <button class="submit-btn" id="submit-btn" onclick="submitReport()">📤 Submit Report</button>
     </div>
   </aside>
 </div>
 
-<!-- Analytics Tab (hidden initially) -->
-<div id="main-analytics" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
+<!-- PAGE: ANALYTICS -->
+<div id="page-analytics" class="page">
   <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">Mobility Analytics</div>
-  <div style="color:var(--text-dim);margin-bottom:32px;">GPS mobility data collected across Freetown · Updated in real time</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
-    <div class="stat-card" style="padding:20px;">
-      <div class="stat-val green" style="font-size:36px;">1,247</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">GPS data points collected</div>
-    </div>
-    <div class="stat-card" style="padding:20px;">
-      <div class="stat-val blue" style="font-size:36px;">38</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Routes mapped in Freetown</div>
-    </div>
-    <div class="stat-card" style="padding:20px;">
-      <div class="stat-val amber" style="font-size:36px;">12</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Flood-risk corridors identified</div>
-    </div>
-    <div class="stat-card" style="padding:20px;">
-      <div class="stat-val" style="font-size:36px;color:#c080ff;">4</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Healthcare facilities tracked</div>
+  <div style="color:var(--text-dim);margin-bottom:28px;">GPS mobility data collected across Freetown · Updated in real time</div>
+  <div class="analytics-grid">
+    <div class="analytics-card"><div class="analytics-val c-green">1,247</div><div class="analytics-lbl">GPS data points collected</div></div>
+    <div class="analytics-card"><div class="analytics-val c-blue">38</div><div class="analytics-lbl">Routes mapped in Freetown</div></div>
+    <div class="analytics-card"><div class="analytics-val c-amber">12</div><div class="analytics-lbl">Flood-risk corridors identified</div></div>
+    <div class="analytics-card"><div class="analytics-val" style="color:#c080ff;">4</div><div class="analytics-lbl">Healthcare facilities tracked</div></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">Route Accessibility Score — Last 7 Days</div>
+    <div class="bar-chart">
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:70%;background:var(--green-lt);"></div></div><div class="bar-label">Mon</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:85%;background:var(--green-lt);"></div></div><div class="bar-label">Tue</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:40%;background:var(--amber);"></div></div><div class="bar-label">Wed</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:20%;background:var(--red);"></div></div><div class="bar-label">Thu</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:55%;background:var(--amber);"></div></div><div class="bar-label">Fri</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:75%;background:var(--green-lt);"></div></div><div class="bar-label">Sat</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:30%;background:var(--red);"></div></div><div class="bar-label">Sun</div></div>
     </div>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;">
-    <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:16px;">Route Accessibility Score — Last 7 Days</div>
-    <div style="display:flex;align-items:flex-end;gap:8px;height:120px;">
-      <!-- simple bar chart -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:70%;background:var(--green-lt);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Mon</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:85%;background:var(--green-lt);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Tue</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:40%;background:var(--amber);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Wed</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:20%;background:var(--red);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Thu</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:55%;background:var(--amber);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Fri</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:75%;background:var(--green-lt);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Sat</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
-        <div style="flex:1;width:100%;background:var(--surface2);border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;">
-          <div style="height:30%;background:var(--red);border-radius:4px;opacity:.85;"></div>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);">Sun</div>
-      </div>
-    </div>
+  <div class="chart-wrap">
+    <div class="chart-title">Most Vulnerable Corridors</div>
+    <div class="corridor-card"><span class="report-badge badge-red">HIGH</span><div><div style="font-weight:500;font-size:13px;">Kissy Road — East Freetown</div><div class="report-loc">Flood-prone, limited alternate routes · Affects 3 clinics</div></div></div>
+    <div class="corridor-card"><span class="report-badge badge-red">HIGH</span><div><div style="font-weight:500;font-size:13px;">Waterloo Highway km 12–18</div><div class="report-loc">Rural corridor · Only route to Waterloo PHU</div></div></div>
+    <div class="corridor-card" style="margin-bottom:0;"><span class="report-badge badge-amber">MED</span><div><div style="font-weight:500;font-size:13px;">Congo Cross Bridge</div><div class="report-loc">Bridge integrity concerns · Alternate via Hill Station</div></div></div>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
-    <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:16px;">Most Vulnerable Corridors</div>
-    <div style="display:grid;gap:10px;">
-      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
-        <span class="report-badge badge-red">HIGH</span>
-        <div><div style="font-weight:500;font-size:13px;">Kissy Road — East Freetown</div><div class="report-loc">Flood-prone, limited alternate routes · Affects 3 clinics</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
-        <span class="report-badge badge-red">HIGH</span>
-        <div><div style="font-weight:500;font-size:13px;">Waterloo Highway km 12–18</div><div class="report-loc">Rural corridor · Only route to Waterloo PHU</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
-        <span class="report-badge badge-amber">MED</span>
-        <div><div style="font-weight:500;font-size:13px;">Congo Cross Bridge</div><div class="report-loc">Bridge integrity concerns · Alternate via Hill Station</div></div>
-      </div>
+</div>
+
+<!-- PAGE: ABOUT -->
+<div id="page-about" class="page">
+  <div class="about-inner">
+    <div class="about-badge">PROTOTYPE · v0.1 · LIVE IN FREETOWN</div>
+    <div class="about-headline">When roads flood, children die waiting.<br><span>SMARTRIDE SALONE changes that.</span></div>
+    <div class="scenario-box">
+      <div class="scenario-label">REAL SCENARIO · EAST FREETOWN</div>
+      <div class="scenario-text">It is 2 AM. Heavy rainfall has flooded Kissy Road — the only route from a child's home to <strong>Ola During Children's Hospital</strong>, Sierra Leone's only university children's hospital. The caregiver has no way of knowing the road is blocked until they are already stuck in floodwater. Minutes pass. The child's condition worsens.</div>
+      <div class="scenario-punchline">SMARTRIDE SALONE exists to prevent that moment.</div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;">One Problem. One Focus.</div>
+    <div style="color:var(--text-dim);line-height:1.8;font-size:14px;margin-bottom:24px;">This platform does one thing with precision: <strong style="color:var(--text);">emergency routing to healthcare facilities during floods.</strong> When a road is blocked, the system flags it the moment a community member reports it, displays safe alternative routes instantly, and alerts anyone heading that direction. For the first time, a caregiver or health worker in Sierra Leone can make a safe, informed decision — before they move.</div>
+    <div class="wow-box">
+      <div class="wow-label">⚡ THE GAME-CHANGING MOMENT</div>
+      <div class="wow-title">A community member reports a blocked road at 1:47 AM.</div>
+      <div class="wow-body">By 1:48 AM, every caregiver, driver, and health worker planning that route sees a live disruption alert on the map. An alternative route is already highlighted. A child who might have been stranded in floodwater is now on a safe road, heading to hospital.</div>
+      <div class="wow-quote">"That is not a feature. That is a child reaching the hospital in time."</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-pill"><div class="stat-pill-val c-green">4</div><div class="stat-pill-lbl">Healthcare facilities tracked</div></div>
+      <div class="stat-pill"><div class="stat-pill-val c-amber">12</div><div class="stat-pill-lbl">Flood-risk corridors mapped</div></div>
+      <div class="stat-pill"><div class="stat-pill-val c-blue">38</div><div class="stat-pill-lbl">Routes mapped in Freetown</div></div>
+    </div>
+    <div class="info-card"><div class="info-card-title">🎯 What We're Solving Right Now</div><div class="info-card-body">Emergency routing to hospitals during flooding · Real-time community road condition reporting · Flood zone overlay for Freetown's most vulnerable corridors · Healthcare facility access status during climate disruptions</div></div>
+    <div class="info-card"><div class="info-card-title">🔮 12-Month Roadmap</div><div class="info-card-body">Android-first mobile app · Real-time GloFAS flood data integration · AI-driven disruption prediction · Offline-capable routing · Pilot testing in flood-prone communities · Open-source Digital Public Good release</div></div>
+    <div class="info-card"><div class="info-card-title">👥 The Team</div><div class="info-card-body">A multidisciplinary team of 5 — spanning software development, finance, communications, and community engagement — with direct field experience supporting vulnerable children in Sierra Leone. This is not a desk project. We have been in those communities.</div></div>
+    <div class="info-card"><div class="info-card-title">🌍 SDG Alignment</div><div class="info-card-body">SDG 3 — Good Health & Well-Being · SDG 11 — Sustainable Cities & Communities · SDG 13 — Climate Action</div></div>
+    <div class="urgent-box">
+      <div class="urgent-title">This is not a future goal.</div>
+      <div class="urgent-body">The prototype is live. The data is collecting. The communities are waiting. Every day without this system is a day when a preventable delay becomes a tragedy. <strong style="color:var(--text);">SMARTRIDE SALONE is ready to save a child's life — today.</strong></div>
     </div>
   </div>
 </div>
 
-<!-- About Tab (hidden initially) -->
-<div id="main-about" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
-  <div style="max-width:700px;margin:0 auto;">
-
-    <div style="display:inline-block;background:var(--green-dim);border:1px solid var(--green);color:var(--green-lt);font-size:11px;padding:4px 12px;border-radius:20px;margin-bottom:20px;font-family:'Space Mono',monospace;">PROTOTYPE · v0.1 · LIVE IN FREETOWN</div>
-
-    <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1.2;margin-bottom:20px;">When roads flood, children die waiting.<br><span style="color:var(--green-lt);">SMARTRIDE SALONE changes that.</span></div>
-
-    <!-- Human scenario -->
-    <div style="background:var(--surface);border-left:3px solid var(--green-lt);border-radius:0 10px 10px 0;padding:20px 24px;margin-bottom:24px;">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green-lt);letter-spacing:.1em;margin-bottom:10px;">REAL SCENARIO · EAST FREETOWN</div>
-      <div style="line-height:1.8;font-size:14px;">It is 2 AM. Heavy rainfall has flooded Kissy Road — the only route from a child's home to <strong>Ola During Children's Hospital</strong>, Sierra Leone's only university children's hospital. The caregiver has no way of knowing the road is blocked until they are already stuck in floodwater. Minutes pass. The child's condition worsens.</div>
-      <div style="margin-top:12px;font-size:14px;font-weight:600;color:var(--green-lt);">SMARTRIDE SALONE exists to prevent that moment.</div>
-    </div>
-
-    <!-- One use case -->
-    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;">One Problem. One Focus.</div>
-    <div style="color:var(--text-dim);line-height:1.8;font-size:14px;margin-bottom:24px;">This platform does one thing with precision: <strong style="color:var(--text);">emergency routing to healthcare facilities during floods.</strong> When a road is blocked, the system flags it the moment a community member reports it, displays safe alternative routes, and alerts anyone heading that direction. For the first time, a caregiver or health worker in Sierra Leone can make a safe, informed decision — before they move.</div>
-
-    <!-- Wow moment -->
-    <div style="background:linear-gradient(135deg,rgba(26,122,74,.2),rgba(32,102,180,.12));border:1px solid var(--green);border-radius:12px;padding:24px;margin-bottom:24px;">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.1em;margin-bottom:10px;">⚡ THE GAME-CHANGING MOMENT</div>
-      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;">A community member reports a blocked road at 1:47 AM.</div>
-      <div style="color:var(--text-dim);line-height:1.8;font-size:14px;">By 1:48 AM, every caregiver, driver, and health worker planning that route sees a live disruption alert on the map. An alternative route is already highlighted. A child who might have been stranded in floodwater is now on a safe road, heading to hospital.</div>
-      <div style="margin-top:14px;font-size:15px;font-weight:600;color:var(--green-lt);">"That is not a feature. That is a child reaching the hospital in time."</div>
-    </div>
-
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green-lt);">4</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Healthcare facilities tracked</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber);">12</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Flood-risk corridors mapped</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue-lt);">38</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Routes mapped in Freetown</div>
-      </div>
-    </div>
-
-    <!-- Cards -->
-    <div style="display:grid;gap:12px;margin-bottom:24px;">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;">🎯 What We're Solving Right Now</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Emergency routing to hospitals during flooding · Real-time community road condition reporting · Flood zone overlay for Freetown's most vulnerable corridors · Healthcare facility access status during climate disruptions</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;">🔮 12-Month Roadmap</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Android-first mobile app · Real-time GloFAS flood data integration · AI-driven disruption prediction · Offline-capable routing · Pilot testing in flood-prone communities · Open-source Digital Public Good release</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;">👥 The Team</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">A multidisciplinary team of 5 — spanning software development, finance, communications, and community engagement — with direct field experience supporting vulnerable children in Sierra Leone. This is not a desk project. We have been in those communities.</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;">🌍 SDG Alignment</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">SDG 3 — Good Health & Well-Being &nbsp;·&nbsp; SDG 11 — Sustainable Cities &nbsp;·&nbsp; SDG 13 — Climate Action</div>
-      </div>
-    </div>
-
-    <!-- Urgent closing -->
-    <div style="background:rgba(214,58,47,.08);border:1px solid rgba(214,58,47,.3);border-radius:12px;padding:24px;text-align:center;">
-      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:10px;">This is not a future goal.</div>
-      <div style="color:var(--text-dim);line-height:1.8;font-size:14px;max-width:520px;margin:0 auto;">The prototype is live. The data is collecting. The communities are waiting. Every day without this system is a day when a preventable delay becomes a tragedy. <strong style="color:var(--text);">SMARTRIDE SALONE is ready to save a child's life — today.</strong></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- Emergency Alert Banner -->
-<div id="emergency-banner" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:2000;align-items:center;gap:12px;background:rgba(214,58,47,.95);padding:10px 20px;font-size:13px;color:white;animation:slideDown .4s ease;">
-  <span>🚨</span>
-  <span id="emergency-text"><strong>ROUTE BLOCKED</strong> — seek an alternative route</span>
-  <span style="margin-left:auto;cursor:pointer;font-size:18px;" onclick="document.getElementById('emergency-banner').style.display='none'">✕</span>
-</div>
-
 <script>
-// ── MAP SETUP ──
+// ── SUPABASE ──
+const SUPABASE_URL = 'https://uafjqmoybxnfnaoclvzx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_EifKzVYKGd9hTJA--eIFEQ_UF4fH70t';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── TAB SWITCHING ──
+function showTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'map') setTimeout(() => map.invalidateSize(), 60);
+}
+
+// ── MAP ──
 const FREETOWN = [8.4657, -13.2317];
-
-const streetTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors',
-  maxZoom: 18
-});
-const satelliteTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles © Esri',
-  maxZoom: 18
-});
-
+const streetTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 18 });
+const satelliteTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri', maxZoom: 18 });
 const map = L.map('map', { zoomControl: true, layers: [streetTiles] }).setView(FREETOWN, 14);
 
-// ── FLOOD ZONES (approximate polygons near Freetown low areas) ──
+// Flood zones
 const floodZones = L.layerGroup();
-const floodData = [
-  { coords: [[8.455, -13.215], [8.460, -13.205], [8.453, -13.200], [8.447, -13.210]], label: 'Kissy Flood Zone' },
-  { coords: [[8.480, -13.245], [8.485, -13.235], [8.478, -13.228], [8.472, -13.240]], label: 'East End Lowland' },
-  { coords: [[8.440, -13.230], [8.445, -13.218], [8.436, -13.215], [8.432, -13.225]], label: 'Waterfront Risk Area' },
-];
-floodData.forEach(f => {
-  L.polygon(f.coords, {
-    color: '#2066b4', weight: 1.5,
-    fillColor: '#2066b4', fillOpacity: 0.22
-  }).bindPopup(`<b>⚠️ ${f.label}</b><br>High flood risk during heavy rainfall`).addTo(floodZones);
+[
+  { coords:[[8.455,-13.215],[8.460,-13.205],[8.453,-13.200],[8.447,-13.210]], label:'Kissy Flood Zone' },
+  { coords:[[8.480,-13.245],[8.485,-13.235],[8.478,-13.228],[8.472,-13.240]], label:'East End Lowland' },
+  { coords:[[8.440,-13.230],[8.445,-13.218],[8.436,-13.215],[8.432,-13.225]], label:'Waterfront Risk Area' },
+].forEach(f => {
+  L.polygon(f.coords, { color:'#2066b4', weight:1.5, fillColor:'#2066b4', fillOpacity:0.22 })
+    .bindPopup('<b>⚠️ ' + f.label + '</b><br>High flood risk during heavy rainfall')
+    .addTo(floodZones);
 });
 floodZones.addTo(map);
 
-// ── HEALTH FACILITIES ──
+// Health facilities
 const healthLayer = L.layerGroup();
-const hospitals = [
-  { pos: [8.4878, -13.2317], name: 'Connaught Hospital', status: 'caution' },
-  { pos: [8.4721, -13.2498], name: "Ola During Children's Hospital", status: 'green' },
-  { pos: [8.4612, -13.2290], name: 'Princess Christian MCH', status: 'red' },
-  { pos: [8.4534, -13.2100], name: 'Kissy Mental Hospital', status: 'green' },
-];
-const statusColors = { green: '#25a868', caution: '#e8a020', amber: '#e8a020', red: '#d63a2f' };
-hospitals.forEach(h => {
-  const icon = L.divIcon({
-    html: `<div style="background:${statusColors[h.status]};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);"></div>`,
-    className: '', iconAnchor: [7,7]
-  });
-  L.marker(h.pos, { icon })
-    .bindPopup(`<b>🏥 ${h.name}</b><br>Access: <b style="color:${statusColors[h.status]}">${h.status.toUpperCase()}</b>`)
-    .addTo(healthLayer);
+const statusColors = { green:'#25a868', caution:'#e8a020', red:'#d63a2f' };
+[
+  { pos:[8.4878,-13.2317], name:'Connaught Hospital',             status:'caution' },
+  { pos:[8.4899,-13.2182], name:"Ola During Children's Hospital", status:'green'   },
+  { pos:[8.4612,-13.2290], name:'Princess Christian MCH',         status:'red'     },
+  { pos:[8.4534,-13.2100], name:'Kissy Mental Hospital',          status:'green'   },
+].forEach(h => {
+  L.marker(h.pos, { icon: L.divIcon({
+    html: '<div style="background:' + statusColors[h.status] + ';width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5);"></div>',
+    className:'', iconAnchor:[7,7]
+  })}).bindPopup('<b>🏥 ' + h.name + '</b><br>Access: <b style="color:' + statusColors[h.status] + '">' + h.status.toUpperCase() + '</b>').addTo(healthLayer);
 });
 healthLayer.addTo(map);
 
-// ── COMMUNITY REPORTS ──
+// Routes
+[
+  { path:[[8.487,-13.231],[8.479,-13.228],[8.470,-13.224],[8.462,-13.229]], color:'#e8a020', label:'Siaka Stevens St (Caution)' },
+  { path:[[8.472,-13.249],[8.468,-13.239],[8.462,-13.229]],                color:'#25a868', label:'Wilkinson Rd (Clear)' },
+  { path:[[8.462,-13.229],[8.458,-13.222],[8.453,-13.213],[8.451,-13.206]],color:'#d63a2f', label:'Kissy Rd (Blocked)' },
+  { path:[[8.487,-13.231],[8.488,-13.245],[8.485,-13.259],[8.480,-13.268]],color:'#25a868', label:'Hill Station Rd (Clear)' },
+  { path:[[8.462,-13.229],[8.455,-13.238],[8.448,-13.247]],                color:'#25a868', label:'Circular Rd (Clear)' },
+].forEach(r => L.polyline(r.path, { color:r.color, weight:5, opacity:.85 }).bindPopup('<b>' + r.label + '</b>').addTo(map));
+
+// Reports layer
 const reportsLayer = L.layerGroup();
-const reportPins = [
-  { pos: [8.455, -13.212], type: 'blocked', text: 'Wellington St — Flooding' },
-  { pos: [8.472, -13.240], type: 'caution', text: 'Congo Cross — Road damage' },
-  { pos: [8.492, -13.265], type: 'clear',   text: 'Lumley Beach Rd — Clear' },
-  { pos: [8.451, -13.206], type: 'blocked', text: 'Kissy Rd — Flash flood' },
-];
-const pinColors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868' };
-reportPins.forEach(r => {
-  const icon = L.divIcon({
-    html: `<div style="background:${pinColors[r.type]};color:white;padding:3px 7px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);">${r.text}</div>`,
-    className: '', iconAnchor: [0,0]
-  });
-  L.marker(r.pos, { icon })
-    .bindPopup(`<b>${r.type.toUpperCase()}</b><br>${r.text}`)
-    .addTo(reportsLayer);
-});
+reportsLayer.addTo(map);
 
-// ── SAMPLE ROUTES ──
-const routes = [
-  { path: [[8.487, -13.231], [8.479, -13.228], [8.470, -13.224], [8.462, -13.229]], color: '#e8a020', label: 'Siaka Stevens St (Caution)' },
-  { path: [[8.472, -13.249], [8.468, -13.239], [8.462, -13.229]], color: '#25a868', label: 'Wilkinson Rd (Clear)' },
-  { path: [[8.462, -13.229], [8.458, -13.222], [8.453, -13.213], [8.451, -13.206]], color: '#d63a2f', label: 'Kissy Rd (Blocked)' },
-  { path: [[8.487, -13.231], [8.488, -13.245], [8.485, -13.259], [8.480, -13.268]], color: '#25a868', label: 'Hill Station Rd (Clear)' },
-  { path: [[8.462, -13.229], [8.455, -13.238], [8.448, -13.247]], color: '#25a868', label: 'Circular Rd (Clear)' },
-];
-routes.forEach(r => {
-  L.polyline(r.path, { color: r.color, weight: 5, opacity: .85 })
-    .bindPopup(`<b>${r.label}</b>`)
-    .addTo(map);
-});
+// Layer toggle
+const layers = { flood:floodZones, health:healthLayer, reports:reportsLayer };
+function toggleLayer(name, btn) {
+  if (map.hasLayer(layers[name])) { map.removeLayer(layers[name]); btn.classList.remove('active'); }
+  else { map.addLayer(layers[name]); btn.classList.add('active'); }
+}
 
-// ── GPS TRACKING ──
-let tracking = false;
-let watchId = null;
-let gpsMarker = null;
-let gpsPath = [];
-let gpsPolyline = null;
-let reportCount = 7;
+// Satellite toggle
+var usingSatellite = false;
+function toggleSatellite(btn) {
+  if (!usingSatellite) { map.removeLayer(streetTiles); satelliteTiles.addTo(map); btn.classList.add('active'); }
+  else { map.removeLayer(satelliteTiles); streetTiles.addTo(map); btn.classList.remove('active'); }
+  usingSatellite = !usingSatellite;
+}
 
+// ── GPS ──
+var tracking=false, watchId=null, gpsMarker=null, gpsPolyline=null, gpsPath=[];
 function toggleGPS() {
   if (!tracking) {
-    if (!navigator.geolocation) {
-      showToast('Geolocation not supported in this browser');
-      return;
-    }
     tracking = true;
     document.getElementById('gps-btn').classList.add('tracking');
     document.getElementById('gps-label').textContent = 'Stop Tracking';
-    document.getElementById('gps-icon').textContent = '🔴';
+    document.getElementById('gps-icon').textContent  = '🔴';
     document.getElementById('gps-status').textContent = 'Acquiring GPS signal...';
-
-    watchId = navigator.geolocation.watchPosition(pos => {
-      const latlng = [pos.coords.latitude, pos.coords.longitude];
-      gpsPath.push(latlng);
+    if (!navigator.geolocation) { simulatePath(); return; }
+    watchId = navigator.geolocation.watchPosition(function(pos) {
+      var ll = [pos.coords.latitude, pos.coords.longitude];
+      gpsPath.push(ll);
       if (gpsMarker) map.removeLayer(gpsMarker);
       if (gpsPolyline) map.removeLayer(gpsPolyline);
-      const icon = L.divIcon({
-        html: `<div style="width:14px;height:14px;background:#25a868;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(37,168,104,.3);"></div>`,
-        className: '', iconAnchor: [7,7]
-      });
-      gpsMarker = L.marker(latlng, { icon }).addTo(map).bindPopup('📍 Your Location');
-      if (gpsPath.length > 1) {
-        gpsPolyline = L.polyline(gpsPath, { color:'#25a868', weight:4, dashArray:'8 4', opacity:.9 }).addTo(map);
-      }
-      map.panTo(latlng);
-      document.getElementById('gps-status').textContent = `Tracking · ${gpsPath.length} points recorded`;
-    }, err => {
-      // Fallback: simulate a path around Freetown for demo
-      document.getElementById('gps-status').textContent = 'Simulating route (demo mode)';
-      simulatePath();
-    }, { enableHighAccuracy: true, maximumAge: 5000 });
-
+      gpsMarker = L.marker(ll, { icon: L.divIcon({ html:'<div style="width:14px;height:14px;background:#25a868;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(37,168,104,.3);"></div>', className:'', iconAnchor:[7,7] }) }).addTo(map);
+      if (gpsPath.length > 1) gpsPolyline = L.polyline(gpsPath, { color:'#25a868', weight:4, dashArray:'8 4', opacity:.9 }).addTo(map);
+      map.panTo(ll);
+      document.getElementById('gps-status').textContent = 'Tracking · ' + gpsPath.length + ' points recorded';
+    }, function() { simulatePath(); }, { enableHighAccuracy:true, maximumAge:5000 });
   } else {
     tracking = false;
     if (watchId) navigator.geolocation.clearWatch(watchId);
     document.getElementById('gps-btn').classList.remove('tracking');
     document.getElementById('gps-label').textContent = 'Start Route Tracking';
-    document.getElementById('gps-icon').textContent = '📡';
-    document.getElementById('gps-status').textContent = gpsPath.length > 0 ? `Session saved · ${gpsPath.length} points` : '';
+    document.getElementById('gps-icon').textContent  = '📡';
+    document.getElementById('gps-status').textContent = gpsPath.length > 0 ? 'Session saved · ' + gpsPath.length + ' points' : '';
   }
 }
-
 function simulatePath() {
-  let i = 0;
-  const simPath = [
-    [8.4620, -13.2290],[8.4640, -13.2280],[8.4660, -13.2275],
-    [8.4680, -13.2260],[8.4700, -13.2245],[8.4720, -13.2230],
-  ];
-  const interval = setInterval(() => {
-    if (!tracking || i >= simPath.length) { clearInterval(interval); return; }
-    const latlng = simPath[i++];
-    gpsPath.push(latlng);
+  document.getElementById('gps-status').textContent = 'Simulating route (demo mode)';
+  var i = 0;
+  var pts = [[8.462,-13.229],[8.464,-13.228],[8.466,-13.228],[8.468,-13.226],[8.470,-13.224],[8.472,-13.223]];
+  var iv = setInterval(function() {
+    if (!tracking || i >= pts.length) { clearInterval(iv); return; }
+    var ll = pts[i++];
+    gpsPath.push(ll);
     if (gpsMarker) map.removeLayer(gpsMarker);
     if (gpsPolyline) map.removeLayer(gpsPolyline);
-    const icon = L.divIcon({
-      html: `<div style="width:14px;height:14px;background:#25a868;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(37,168,104,.3);"></div>`,
-      className:'', iconAnchor:[7,7]
-    });
-    gpsMarker = L.marker(latlng, { icon }).addTo(map);
-    if (gpsPath.length > 1) {
-      gpsPolyline = L.polyline(gpsPath, { color:'#25a868', weight:4, dashArray:'8 4', opacity:.9 }).addTo(map);
-    }
-    map.panTo(latlng);
-    document.getElementById('gps-status').textContent = `Demo tracking · ${gpsPath.length} points`;
+    gpsMarker = L.marker(ll, { icon: L.divIcon({ html:'<div style="width:14px;height:14px;background:#25a868;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(37,168,104,.3);"></div>', className:'', iconAnchor:[7,7] }) }).addTo(map);
+    if (gpsPath.length > 1) gpsPolyline = L.polyline(gpsPath, { color:'#25a868', weight:4, dashArray:'8 4', opacity:.9 }).addTo(map);
+    map.panTo(ll);
+    document.getElementById('gps-status').textContent = 'Demo tracking · ' + gpsPath.length + ' points';
   }, 1200);
 }
 
-// ── LAYER TOGGLES ──
-const layers = { flood: floodZones, health: healthLayer, reports: reportsLayer };
-function toggleLayer(name, btn) {
-  if (map.hasLayer(layers[name])) {
-    map.removeLayer(layers[name]);
-    btn.classList.remove('active');
-  } else {
-    map.addLayer(layers[name]);
-    btn.classList.add('active');
+// ── REPORTS ──
+var reportCount = 7;
+async function submitReport() {
+  var loc    = document.getElementById('r-location').value.trim();
+  var type   = document.getElementById('r-type').value;
+  var detail = document.getElementById('r-detail').value.trim();
+  if (!loc || !type) { showToast('Please fill in location and condition type'); return; }
+  var btn = document.getElementById('submit-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  var result = await db.from('reports').insert({ location: loc, type: type, detail: detail });
+  btn.textContent = '📤 Submit Report'; btn.disabled = false;
+  if (result.error) { console.error(result.error); showToast('⚠️ Could not save — please try again'); return; }
+  addReportToUI({ location:loc, type:type, detail:detail, created_at: new Date().toISOString() }, true);
+  reportCount++;
+  document.getElementById('report-count').textContent = reportCount;
+  document.getElementById('r-location').value = '';
+  document.getElementById('r-type').value     = '';
+  document.getElementById('r-detail').value   = '';
+  showToast('✅ Report saved — thank you!');
+  if (type === 'blocked' || type === 'health') {
+    document.getElementById('banner-text').innerHTML = '<strong>🚨 BLOCK REPORTED:</strong> "' + loc + '" — seek an alternative route';
+    var banner = document.getElementById('emergency-banner');
+    banner.classList.add('show');
+    setTimeout(function() { banner.classList.remove('show'); }, 12000);
   }
 }
 
-// ── SATELLITE TOGGLE ──
-let usingSatellite = false;
-function toggleSatellite(btn) {
-  if (!usingSatellite) {
-    map.removeLayer(streetTiles);
-    satelliteTiles.addTo(map);
-    btn.classList.add('active');
-    document.querySelectorAll('.leaflet-tile').forEach(t => t.style.filter = 'none');
-  } else {
-    map.removeLayer(satelliteTiles);
-    streetTiles.addTo(map);
-    btn.classList.remove('active');
-  }
-  usingSatellite = !usingSatellite;
-}
-
-// ── FLY TO FREETOWN ──
-function flyToFreetown() {
-  map.flyTo(FREETOWN, 14, { animate: true, duration: 1 });
-}
-
-// ── SUPABASE CONFIG (no library needed — uses fetch directly) ──
-const SB_URL = 'https://uafjqmoybxnfnaoclvzx.supabase.co/rest/v1';
-const SB_KEY = 'sb_publishable_EifKzVYKGd9hTJA--eIFEQ_UF4fH70t';
-const SB_HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SB_KEY,
-  'Authorization': 'Bearer ' + SB_KEY
-};
-
-// ── LOAD SAVED REPORTS FROM SUPABASE ──
-async function loadReports() {
-  try {
-    const res = await fetch(`${SB_URL}/reports?order=created_at.desc&limit=20`, { headers: SB_HEADERS });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data || data.length === 0) return;
-    document.getElementById('reports-list').innerHTML = '';
-    reportCount = 7 + data.length;
-    document.getElementById('report-count').textContent = reportCount;
-    data.forEach(r => addReportToUI(r));
-  } catch(e) { console.warn('Could not load reports:', e); }
-}
-
-// ── ADD REPORT TO SIDEBAR + MAP ──
-function addReportToUI(r, prepend = false) {
-  const badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
-  const labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH ACCESS BLOCKED' };
-  const age = r.created_at ? timeAgo(r.created_at) : 'Just now';
-  const el = document.createElement('div');
+function addReportToUI(r, prepend) {
+  var badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
+  var labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH BLOCKED' };
+  var el = document.createElement('div');
   el.className = 'report-item';
-  el.innerHTML = `
-    <div class="report-item-top">
-      <span class="report-badge ${badgeMap[r.type]||'badge-amber'}">${labelMap[r.type]||r.type}</span>
-      <span class="report-time">${age}</span>
-    </div>
-    <div>${r.location}</div>
-    <div class="report-loc">📍 Community report${r.detail ? ' · '+r.detail.slice(0,40) : ''}</div>
-  `;
-  const list = document.getElementById('reports-list');
-  prepend ? list.insertBefore(el, list.firstChild) : list.appendChild(el);
-  // map pin
-  const colors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868', health:'#d63a2f' };
-  const c = map.getCenter();
-  const icon = L.divIcon({
-    html:`<div style="background:${colors[r.type]||'#e8a020'};color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">${r.location}</div>`,
+  el.innerHTML = '<div class="report-item-top"><span class="report-badge ' + (badgeMap[r.type]||'badge-amber') + '">' + (labelMap[r.type]||r.type.toUpperCase()) + '</span><span class="report-time">' + timeAgo(r.created_at) + '</span></div><div>' + r.location + '</div><div class="report-loc">📍 Community report' + (r.detail ? ' · ' + r.detail.slice(0,40) : '') + '</div>';
+  var list = document.getElementById('reports-list');
+  if (prepend) list.insertBefore(el, list.firstChild); else list.appendChild(el);
+  var pinColors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868', health:'#d63a2f' };
+  var c = map.getCenter();
+  L.marker([c.lat+(Math.random()-.5)*.005, c.lng+(Math.random()-.5)*.005], { icon: L.divIcon({
+    html: '<div style="background:' + (pinColors[r.type]||'#e8a020') + ';color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">' + r.location + '</div>',
     className:'', iconAnchor:[0,0]
-  });
-  L.marker([c.lat+(Math.random()-.5)*.005, c.lng+(Math.random()-.5)*.005], {icon})
-    .bindPopup(`<b>${(labelMap[r.type]||r.type).toUpperCase()}</b><br>${r.location}`)
-    .addTo(reportsLayer);
+  }) }).bindPopup('<b>' + (labelMap[r.type]||r.type) + '</b><br>' + r.location).addTo(reportsLayer);
   if (!map.hasLayer(reportsLayer)) map.addLayer(reportsLayer);
 }
 
-// ── TIME AGO ──
+async function loadReports() {
+  var result = await db.from('reports').select('*').order('created_at', { ascending:false }).limit(20);
+  if (result.error || !result.data || result.data.length === 0) return;
+  document.getElementById('reports-list').innerHTML = '';
+  reportCount = 7 + result.data.length;
+  document.getElementById('report-count').textContent = reportCount;
+  result.data.forEach(function(r) { addReportToUI(r, false); });
+}
+
 function timeAgo(iso) {
-  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s/60)} min ago`;
-  if (s < 86400) return `${Math.floor(s/3600)} hr ago`;
-  return `${Math.floor(s/86400)}d ago`;
+  var s = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (s < 60)    return s + 's ago';
+  if (s < 3600)  return Math.floor(s/60) + ' min ago';
+  if (s < 86400) return Math.floor(s/3600) + ' hr ago';
+  return Math.floor(s/86400) + 'd ago';
 }
 
-// ── SUBMIT REPORT ──
-async function submitReport() {
-  const loc    = document.getElementById('r-location').value.trim();
-  const type   = document.getElementById('r-type').value;
-  const detail = document.getElementById('r-detail').value.trim();
-  if (!loc || !type) { showToast('Please fill in location and condition type'); return; }
-
-  const btn = document.querySelector('.submit-btn');
-  btn.textContent = 'Saving...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`${SB_URL}/reports`, {
-      method: 'POST',
-      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ location: loc, type, detail })
-    });
-    if (!res.ok) throw new Error('Save failed');
-    addReportToUI({ location: loc, type, detail, created_at: new Date().toISOString() }, true);
-    reportCount++;
-    document.getElementById('report-count').textContent = reportCount;
-    document.getElementById('r-location').value = '';
-    document.getElementById('r-type').value = '';
-    document.getElementById('r-detail').value = '';
-    showToast('✅ Report saved — thank you!');
-    // Emergency banner for blocked roads
-    if (type === 'blocked' || type === 'health') {
-      const banner = document.getElementById('emergency-banner');
-      document.getElementById('emergency-text').innerHTML =
-        `<strong>🚨 ROUTE BLOCKED:</strong> "${loc}" — avoid this route, seek an alternative`;
-      banner.style.display = 'flex';
-      setTimeout(() => banner.style.display = 'none', 12000);
-    }
-  } catch(e) {
-    showToast('⚠️ Could not save — check your connection');
-  }
-
-  btn.textContent = '📤 Submit Report';
-  btn.disabled = false;
-}
-
-window.addEventListener('load', loadReports);
-
-// ── TAB SWITCHING ──
-function setTab(btn, tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('main-map').style.display = tab === 'map' ? 'flex' : 'none';
-  document.getElementById('main-analytics').style.display = tab === 'analytics' ? 'flex' : 'none';
-  document.getElementById('main-about').style.display = tab === 'about' ? 'flex' : 'none';
-  if (tab === 'map') setTimeout(() => map.invalidateSize(), 50);
-}
-
-// ── TOAST ──
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
 }
+
+loadReports();
 </script>
 </body>
 </html>
