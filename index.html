@@ -424,7 +424,7 @@
   </div>
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>LIVE · Freetown</div>
-    <div class="weather-chip">⚠ Heavy Rain Alert</div>
+    <div class="weather-chip">⚠ Heavy Rain · Kissy Rd BLOCKED</div>
   </div>
 </header>
 
@@ -598,7 +598,7 @@
 <!-- Analytics Tab (hidden initially) -->
 <div id="main-analytics" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
   <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">Mobility Analytics</div>
-  <div style="color:var(--text-dim);margin-bottom:32px;">GPS mobility data collected across Freetown · Updated in real time</div>
+  <div style="color:var(--text-dim);margin-bottom:32px;">GPS mobility data collected across Freetown · Community reports updated in real time</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
     <div class="stat-card" style="padding:20px;">
       <div class="stat-val green" style="font-size:36px;">1,247</div>
@@ -613,8 +613,8 @@
       <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Flood-risk corridors identified</div>
     </div>
     <div class="stat-card" style="padding:20px;">
-      <div class="stat-val" style="font-size:36px;color:#c080ff;">4</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Healthcare facilities tracked</div>
+      <div class="stat-val" style="font-size:36px;color:#c080ff;" id="analytics-report-count">—</div>
+      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Community reports submitted</div>
     </div>
   </div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;">
@@ -686,28 +686,77 @@
 
 <!-- About Tab (hidden initially) -->
 <div id="main-about" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
-  <div style="max-width:680px;margin:0 auto;">
-    <div style="display:inline-block;background:var(--green-dim);border:1px solid var(--green);color:var(--green-lt);font-size:11px;padding:4px 12px;border-radius:20px;margin-bottom:16px;font-family:'Space Mono',monospace;">PROTOTYPE · v0.1</div>
-    <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1.2;margin-bottom:12px;">Climate-Resilient Mobility Intelligence for Sierra Leone</div>
-    <div style="color:var(--text-dim);line-height:1.7;margin-bottom:24px;">SMARTRIDE SALONE addresses the critical gap between climate disruptions and healthcare access. Using GPS-based route intelligence and community reporting, the platform helps vulnerable communities — especially children — navigate safely during flooding and heavy rainfall events.</div>
-    <div style="display:grid;gap:12px;">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-weight:700;margin-bottom:6px;">🎯 Current Focus</div>
-        <div style="color:var(--text-dim);font-size:13px;">GPS route tracking · Community condition reporting · Flood zone overlay · Healthcare facility mapping</div>
+  <div style="max-width:720px;margin:0 auto;">
+
+    <!-- Badge -->
+    <div style="display:inline-block;background:var(--green-dim);border:1px solid var(--green);color:var(--green-lt);font-size:11px;padding:4px 12px;border-radius:20px;margin-bottom:20px;font-family:'Space Mono',monospace;">PROTOTYPE · v0.1 · LIVE IN FREETOWN</div>
+
+    <!-- Hero headline -->
+    <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1.2;margin-bottom:20px;">When roads flood, children die waiting.<br><span style="color:var(--green-lt);">SMARTRIDE SALONE changes that.</span></div>
+
+    <!-- Human scenario -->
+    <div style="background:var(--surface);border-left:3px solid var(--green-lt);border-radius:0 10px 10px 0;padding:20px 24px;margin-bottom:24px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green-lt);letter-spacing:.1em;margin-bottom:10px;">REAL SCENARIO · EAST FREETOWN</div>
+      <div style="line-height:1.8;font-size:14px;color:var(--text);">It is 2 AM. Heavy rainfall has flooded Kissy Road — the only route from a child's home to <strong>Ola During Children's Hospital</strong>, Sierra Leone's only university children's hospital. The caregiver has no way of knowing the road is blocked until they are already stuck in floodwater. Minutes pass. The child's condition worsens.</div>
+      <div style="margin-top:12px;font-size:14px;color:var(--green-lt);font-weight:600;">SMARTRIDE SALONE exists to prevent that moment.</div>
+    </div>
+
+    <!-- One use case -->
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;">One Problem. One Focus.</div>
+    <div style="color:var(--text-dim);line-height:1.8;font-size:14px;margin-bottom:24px;">
+      This platform does one thing with precision: <strong style="color:var(--text);">emergency routing to healthcare facilities during floods.</strong> When a road is blocked, the system flags it the moment a community member reports it, displays safe alternative routes instantly, and alerts anyone heading that direction. For the first time, a caregiver or health worker in Sierra Leone can make a safe, informed decision — before they move.
+    </div>
+
+    <!-- Wow moment -->
+    <div style="background:linear-gradient(135deg,rgba(26,122,74,.25),rgba(32,102,180,.15));border:1px solid var(--green);border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.1em;margin-bottom:10px;">⚡ THE GAME-CHANGING MOMENT</div>
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;">A community member reports a blocked road at 1:47 AM.</div>
+      <div style="color:var(--text-dim);line-height:1.8;font-size:14px;">By 1:48 AM, every caregiver, driver, and health worker planning that route sees a live disruption alert on the map. An alternative route is already highlighted. A child who might have been stranded in floodwater is now on a safe road, heading to hospital.</div>
+      <div style="margin-top:14px;font-size:15px;font-weight:600;color:var(--green-lt);">"That is not a feature. That is a child reaching the hospital in time."</div>
+    </div>
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green-lt);">4</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Healthcare facilities tracked</div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-weight:700;margin-bottom:6px;">🔮 12-Month Roadmap</div>
-        <div style="color:var(--text-dim);font-size:13px;">AI-driven disruption prediction · Mobile app (Android-first) · Offline capability · Open-source Digital Public Good release</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber);">12</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Flood-risk corridors mapped</div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-weight:700;margin-bottom:6px;">👥 Team</div>
-        <div style="color:var(--text-dim);font-size:13px;">Multidisciplinary team of 5 · Software development · Finance · Communications · Community engagement · Field research</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-weight:700;margin-bottom:6px;">🌍 SDG Alignment</div>
-        <div style="color:var(--text-dim);font-size:13px;">SDG 3 — Good Health & Well-Being &nbsp;·&nbsp; SDG 11 — Sustainable Cities &nbsp;·&nbsp; SDG 13 — Climate Action</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue-lt);">38</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Routes mapped in Freetown</div>
       </div>
     </div>
+
+    <!-- Cards -->
+    <div style="display:grid;gap:12px;margin-bottom:24px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
+        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🎯 What We're Solving Right Now</div>
+        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Emergency routing to hospitals during flooding · Real-time community road condition reporting · Flood zone overlay for Freetown's most vulnerable corridors · Healthcare facility access status during climate disruptions</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
+        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🔮 12-Month Roadmap</div>
+        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Android-first mobile app · Real-time GloFAS flood data integration · AI-driven disruption prediction · Offline-capable routing · Pilot testing in flood-prone communities · Open-source Digital Public Good release</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
+        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">👥 The Team</div>
+        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">A multidisciplinary team of 5 — spanning software development, finance, communications, and community engagement — with direct field experience supporting vulnerable children in Sierra Leone. This is not a desk project. We have been in those communities.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
+        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🌍 SDG Alignment</div>
+        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">SDG 3 — Good Health & Well-Being &nbsp;·&nbsp; SDG 11 — Sustainable Cities & Communities &nbsp;·&nbsp; SDG 13 — Climate Action</div>
+      </div>
+    </div>
+
+    <!-- Urgent closing -->
+    <div style="background:rgba(214,58,47,.08);border:1px solid rgba(214,58,47,.3);border-radius:12px;padding:24px;text-align:center;">
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:10px;color:var(--text);">This is not a future goal.</div>
+      <div style="color:var(--text-dim);line-height:1.8;font-size:14px;max-width:520px;margin:0 auto;">The prototype is live. The data is collecting. The communities are waiting. Every day without this system is a day when a preventable delay becomes a tragedy. <strong style="color:var(--text);">SMARTRIDE SALONE is ready to save a child's life — today.</strong></div>
+    </div>
+
   </div>
 </div>
 
@@ -993,6 +1042,8 @@ async function loadReports() {
   document.getElementById('reports-list').innerHTML = '';
   reportCount = 7 + data.length;
   document.getElementById('report-count').textContent = reportCount;
+  const analyticsEl = document.getElementById('analytics-report-count');
+  if (analyticsEl) analyticsEl.textContent = data.length;
 
   data.forEach(r => addReportToUI(r, false));
 }
