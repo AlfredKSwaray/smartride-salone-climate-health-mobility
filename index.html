@@ -10,9 +10,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -377,28 +374,6 @@
     }
     #toast.show { opacity: 1; }
 
-    /* emergency alert banner */
-    .emergency-banner {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: rgba(214,58,47,.12);
-      border-bottom: 1px solid rgba(214,58,47,.4);
-      padding: 10px 20px;
-      font-size: 13px;
-      color: #f07870;
-      flex-shrink: 0;
-      animation: slideDown .4s ease;
-    }
-    @keyframes slideDown {
-      from { transform: translateY(-100%); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .emergency-banner.show { display: flex; }
-    .emergency-banner strong { color: var(--text); }
-    .banner-close { margin-left:auto; cursor:pointer; opacity:.6; font-size:16px; }
-    .banner-close:hover { opacity:1; }
-
     /* scrollbar for right */
     .right-panel::-webkit-scrollbar { width: 4px; }
 
@@ -447,16 +422,9 @@
   </div>
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>LIVE · Freetown</div>
-    <div class="weather-chip" id="flood-alert-chip">⏳ Fetching flood data...</div>
+    <div class="weather-chip">⚠ Heavy Rain Alert</div>
   </div>
 </header>
-
-<!-- ── EMERGENCY ALERT BANNER ── -->
-<div class="emergency-banner" id="emergency-banner">
-  <span>🚨</span>
-  <span id="emergency-text"><strong>ROUTE BLOCKED:</strong> Kissy Road flooded — alternative via Wilkinson Rd recommended</span>
-  <span class="banner-close" onclick="document.getElementById('emergency-banner').classList.remove('show')">✕</span>
-</div>
 
 <!-- ── MAIN ── -->
 <div class="main" id="main-map">
@@ -504,11 +472,6 @@
       <button class="control-btn" id="btn-reports" onclick="toggleLayer('reports',this)">
         <span class="icon">📍</span> Community Reports
       </button>
-    </div>
-
-    <div class="sidebar-section" id="flood-data-panel">
-      <div class="section-label">🌊 Live Flood Intelligence</div>
-      <div style="color:var(--text-dim);font-size:12px;padding:4px 0;">Fetching real river discharge data...</div>
     </div>
 
     <div class="sidebar-section" style="flex:1;">
@@ -633,7 +596,7 @@
 <!-- Analytics Tab (hidden initially) -->
 <div id="main-analytics" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
   <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">Mobility Analytics</div>
-  <div style="color:var(--text-dim);margin-bottom:32px;">GPS mobility data collected across Freetown · Community reports updated in real time</div>
+  <div style="color:var(--text-dim);margin-bottom:32px;">GPS mobility data collected across Freetown · Updated in real time</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
     <div class="stat-card" style="padding:20px;">
       <div class="stat-val green" style="font-size:36px;">1,247</div>
@@ -648,8 +611,8 @@
       <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Flood-risk corridors identified</div>
     </div>
     <div class="stat-card" style="padding:20px;">
-      <div class="stat-val" style="font-size:36px;color:#c080ff;" id="analytics-report-count">—</div>
-      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Community reports submitted</div>
+      <div class="stat-val" style="font-size:36px;color:#c080ff;">4</div>
+      <div class="stat-lbl" style="font-size:13px;margin-top:6px;">Healthcare facilities tracked</div>
     </div>
   </div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;">
@@ -721,36 +684,32 @@
 
 <!-- About Tab (hidden initially) -->
 <div id="main-about" style="display:none;flex:1;padding:32px;overflow-y:auto;background:var(--bg);">
-  <div style="max-width:720px;margin:0 auto;">
+  <div style="max-width:700px;margin:0 auto;">
 
-    <!-- Badge -->
     <div style="display:inline-block;background:var(--green-dim);border:1px solid var(--green);color:var(--green-lt);font-size:11px;padding:4px 12px;border-radius:20px;margin-bottom:20px;font-family:'Space Mono',monospace;">PROTOTYPE · v0.1 · LIVE IN FREETOWN</div>
 
-    <!-- Hero headline -->
     <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1.2;margin-bottom:20px;">When roads flood, children die waiting.<br><span style="color:var(--green-lt);">SMARTRIDE SALONE changes that.</span></div>
 
     <!-- Human scenario -->
     <div style="background:var(--surface);border-left:3px solid var(--green-lt);border-radius:0 10px 10px 0;padding:20px 24px;margin-bottom:24px;">
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green-lt);letter-spacing:.1em;margin-bottom:10px;">REAL SCENARIO · EAST FREETOWN</div>
-      <div style="line-height:1.8;font-size:14px;color:var(--text);">It is 2 AM. Heavy rainfall has flooded Kissy Road — the only route from a child's home to <strong>Ola During Children's Hospital</strong>, Sierra Leone's only university children's hospital. The caregiver has no way of knowing the road is blocked until they are already stuck in floodwater. Minutes pass. The child's condition worsens.</div>
-      <div style="margin-top:12px;font-size:14px;color:var(--green-lt);font-weight:600;">SMARTRIDE SALONE exists to prevent that moment.</div>
+      <div style="line-height:1.8;font-size:14px;">It is 2 AM. Heavy rainfall has flooded Kissy Road — the only route from a child's home to <strong>Ola During Children's Hospital</strong>, Sierra Leone's only university children's hospital. The caregiver has no way of knowing the road is blocked until they are already stuck in floodwater. Minutes pass. The child's condition worsens.</div>
+      <div style="margin-top:12px;font-size:14px;font-weight:600;color:var(--green-lt);">SMARTRIDE SALONE exists to prevent that moment.</div>
     </div>
 
     <!-- One use case -->
-    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;">One Problem. One Focus.</div>
-    <div style="color:var(--text-dim);line-height:1.8;font-size:14px;margin-bottom:24px;">
-      This platform does one thing with precision: <strong style="color:var(--text);">emergency routing to healthcare facilities during floods.</strong> When a road is blocked, the system flags it the moment a community member reports it, displays safe alternative routes instantly, and alerts anyone heading that direction. For the first time, a caregiver or health worker in Sierra Leone can make a safe, informed decision — before they move.
-    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;">One Problem. One Focus.</div>
+    <div style="color:var(--text-dim);line-height:1.8;font-size:14px;margin-bottom:24px;">This platform does one thing with precision: <strong style="color:var(--text);">emergency routing to healthcare facilities during floods.</strong> When a road is blocked, the system flags it the moment a community member reports it, displays safe alternative routes, and alerts anyone heading that direction. For the first time, a caregiver or health worker in Sierra Leone can make a safe, informed decision — before they move.</div>
 
     <!-- Wow moment -->
-    <div style="background:linear-gradient(135deg,rgba(26,122,74,.25),rgba(32,102,180,.15));border:1px solid var(--green);border-radius:12px;padding:24px;margin-bottom:24px;">
+    <div style="background:linear-gradient(135deg,rgba(26,122,74,.2),rgba(32,102,180,.12));border:1px solid var(--green);border-radius:12px;padding:24px;margin-bottom:24px;">
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.1em;margin-bottom:10px;">⚡ THE GAME-CHANGING MOMENT</div>
-      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;">A community member reports a blocked road at 1:47 AM.</div>
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;">A community member reports a blocked road at 1:47 AM.</div>
       <div style="color:var(--text-dim);line-height:1.8;font-size:14px;">By 1:48 AM, every caregiver, driver, and health worker planning that route sees a live disruption alert on the map. An alternative route is already highlighted. A child who might have been stranded in floodwater is now on a safe road, heading to hospital.</div>
       <div style="margin-top:14px;font-size:15px;font-weight:600;color:var(--green-lt);">"That is not a feature. That is a child reaching the hospital in time."</div>
     </div>
 
-    <!-- Stats row -->
+    <!-- Stats -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
         <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green-lt);">4</div>
@@ -769,26 +728,26 @@
     <!-- Cards -->
     <div style="display:grid;gap:12px;margin-bottom:24px;">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🎯 What We're Solving Right Now</div>
+        <div style="font-weight:700;margin-bottom:8px;">🎯 What We're Solving Right Now</div>
         <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Emergency routing to hospitals during flooding · Real-time community road condition reporting · Flood zone overlay for Freetown's most vulnerable corridors · Healthcare facility access status during climate disruptions</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🔮 12-Month Roadmap</div>
+        <div style="font-weight:700;margin-bottom:8px;">🔮 12-Month Roadmap</div>
         <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">Android-first mobile app · Real-time GloFAS flood data integration · AI-driven disruption prediction · Offline-capable routing · Pilot testing in flood-prone communities · Open-source Digital Public Good release</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">👥 The Team</div>
+        <div style="font-weight:700;margin-bottom:8px;">👥 The Team</div>
         <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">A multidisciplinary team of 5 — spanning software development, finance, communications, and community engagement — with direct field experience supporting vulnerable children in Sierra Leone. This is not a desk project. We have been in those communities.</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;">
-        <div style="font-weight:700;margin-bottom:8px;font-size:14px;">🌍 SDG Alignment</div>
-        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">SDG 3 — Good Health & Well-Being &nbsp;·&nbsp; SDG 11 — Sustainable Cities & Communities &nbsp;·&nbsp; SDG 13 — Climate Action</div>
+        <div style="font-weight:700;margin-bottom:8px;">🌍 SDG Alignment</div>
+        <div style="color:var(--text-dim);font-size:13px;line-height:1.7;">SDG 3 — Good Health & Well-Being &nbsp;·&nbsp; SDG 11 — Sustainable Cities &nbsp;·&nbsp; SDG 13 — Climate Action</div>
       </div>
     </div>
 
     <!-- Urgent closing -->
     <div style="background:rgba(214,58,47,.08);border:1px solid rgba(214,58,47,.3);border-radius:12px;padding:24px;text-align:center;">
-      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:10px;color:var(--text);">This is not a future goal.</div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:10px;">This is not a future goal.</div>
       <div style="color:var(--text-dim);line-height:1.8;font-size:14px;max-width:520px;margin:0 auto;">The prototype is live. The data is collecting. The communities are waiting. Every day without this system is a day when a preventable delay becomes a tragedy. <strong style="color:var(--text);">SMARTRIDE SALONE is ready to save a child's life — today.</strong></div>
     </div>
 
@@ -798,12 +757,14 @@
 <!-- Toast -->
 <div id="toast"></div>
 
-<script>
-// ── SUPABASE INIT ──
-const SUPABASE_URL = 'https://uafjqmoybxnfnaoclvzx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_EifKzVYKGd9hTJA--eIFEQ_UF4fH70t';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- Emergency Alert Banner -->
+<div id="emergency-banner" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:2000;align-items:center;gap:12px;background:rgba(214,58,47,.95);padding:10px 20px;font-size:13px;color:white;animation:slideDown .4s ease;">
+  <span>🚨</span>
+  <span id="emergency-text"><strong>ROUTE BLOCKED</strong> — seek an alternative route</span>
+  <span style="margin-left:auto;cursor:pointer;font-size:18px;" onclick="document.getElementById('emergency-banner').style.display='none'">✕</span>
+</div>
 
+<script>
 // ── MAP SETUP ──
 const FREETOWN = [8.4657, -13.2317];
 
@@ -820,18 +781,16 @@ const map = L.map('map', { zoomControl: true, layers: [streetTiles] }).setView(F
 
 // ── FLOOD ZONES (approximate polygons near Freetown low areas) ──
 const floodZones = L.layerGroup();
-const floodPolygons = [];
 const floodData = [
   { coords: [[8.455, -13.215], [8.460, -13.205], [8.453, -13.200], [8.447, -13.210]], label: 'Kissy Flood Zone' },
   { coords: [[8.480, -13.245], [8.485, -13.235], [8.478, -13.228], [8.472, -13.240]], label: 'East End Lowland' },
   { coords: [[8.440, -13.230], [8.445, -13.218], [8.436, -13.215], [8.432, -13.225]], label: 'Waterfront Risk Area' },
 ];
 floodData.forEach(f => {
-  const poly = L.polygon(f.coords, {
+  L.polygon(f.coords, {
     color: '#2066b4', weight: 1.5,
     fillColor: '#2066b4', fillOpacity: 0.22
-  }).bindPopup(`<b>⚠️ ${f.label}</b><br>Loading real flood data...`).addTo(floodZones);
-  floodPolygons.push(poly);
+  }).bindPopup(`<b>⚠️ ${f.label}</b><br>High flood risk during heavy rainfall`).addTo(floodZones);
 });
 floodZones.addTo(map);
 
@@ -887,121 +846,6 @@ routes.forEach(r => {
     .bindPopup(`<b>${r.label}</b>`)
     .addTo(map);
 });
-
-// ── REAL FLOOD DATA (Open-Meteo GloFAS API) ──
-// River monitoring points around Freetown flood-prone corridors
-const FLOOD_POINTS = [
-  { name: 'Kissy Flood Zone',      lat: 8.453,  lng: -13.207, zoneIndex: 0 },
-  { name: 'East End Lowland',      lat: 8.480,  lng: -13.237, zoneIndex: 1 },
-  { name: 'Waterfront Risk Area',  lat: 8.440,  lng: -13.225, zoneIndex: 2 },
-];
-
-// Discharge thresholds (m³/s) for Sierra Leone small rivers
-const THRESHOLDS = { low: 15, medium: 40, high: 80 };
-
-let floodPolygons = []; // store polygon refs for dynamic recoloring
-
-function getRiskLevel(discharge) {
-  if (discharge === null || discharge === undefined) return 'unknown';
-  if (discharge >= THRESHOLDS.high)   return 'critical';
-  if (discharge >= THRESHOLDS.medium) return 'high';
-  if (discharge >= THRESHOLDS.low)    return 'moderate';
-  return 'low';
-}
-
-function getRiskColor(level) {
-  return { critical:'#d63a2f', high:'#e8a020', moderate:'#2066b4', low:'#25a868', unknown:'#7a9a83' }[level];
-}
-
-function getRiskOpacity(level) {
-  return { critical:0.45, high:0.35, moderate:0.22, low:0.12, unknown:0.15 }[level];
-}
-
-async function fetchFloodData() {
-  const chip = document.getElementById('flood-alert-chip');
-  const panel = document.getElementById('flood-data-panel');
-
-  try {
-    const results = await Promise.all(FLOOD_POINTS.map(async (pt) => {
-      const url = `https://flood-api.open-meteo.com/v1/flood?latitude=${pt.lat}&longitude=${pt.lng}&daily=river_discharge&forecast_days=3`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const discharge = data?.daily?.river_discharge?.[0] ?? null;
-      const risk = getRiskLevel(discharge);
-      return { ...pt, discharge, risk };
-    }));
-
-    // Update flood zone polygon colors dynamically
-    results.forEach((pt, i) => {
-      if (floodPolygons[i]) {
-        floodPolygons[i].setStyle({
-          color: getRiskColor(pt.risk),
-          fillColor: getRiskColor(pt.risk),
-          fillOpacity: getRiskOpacity(pt.risk),
-          weight: pt.risk === 'critical' ? 2.5 : 1.5,
-        });
-        floodPolygons[i].bindPopup(
-          `<b>⚠️ ${pt.name}</b><br>
-           River discharge: <b>${pt.discharge !== null ? pt.discharge.toFixed(1) + ' m³/s' : 'No data'}</b><br>
-           Flood risk: <b style="color:${getRiskColor(pt.risk)}">${pt.risk.toUpperCase()}</b><br>
-           <small>Source: GloFAS via Open-Meteo · Live</small>`
-        );
-      }
-    });
-
-    // Update header alert chip
-    const maxRisk = results.reduce((max, pt) => {
-      const order = ['unknown','low','moderate','high','critical'];
-      return order.indexOf(pt.risk) > order.indexOf(max) ? pt.risk : max;
-    }, 'low');
-
-    const chipMessages = {
-      critical: '🔴 CRITICAL Flood Risk',
-      high:     '🟠 HIGH Flood Risk',
-      moderate: '🟡 Elevated River Levels',
-      low:      '🟢 Normal River Levels',
-      unknown:  '⚪ Flood Data Unavailable',
-    };
-    chip.textContent = chipMessages[maxRisk];
-    chip.style.background = `${getRiskColor(maxRisk)}22`;
-    chip.style.borderColor = `${getRiskColor(maxRisk)}55`;
-    chip.style.color = getRiskColor(maxRisk);
-
-    // Update sidebar flood panel
-    if (panel) {
-      panel.innerHTML = `
-        <div class="section-label">🌊 Live Flood Intelligence</div>
-        ${results.map(pt => `
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <span style="font-size:12px;font-weight:600;">${pt.name}</span>
-              <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;
-                background:${getRiskColor(pt.risk)}22;color:${getRiskColor(pt.risk)};
-                border:1px solid ${getRiskColor(pt.risk)}44;">
-                ${pt.risk.toUpperCase()}
-              </span>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);">
-              ${pt.discharge !== null ? pt.discharge.toFixed(1) + ' m³/s discharge' : 'No river data at this point'}
-            </div>
-          </div>
-        `).join('')}
-        <div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:4px;">
-          📡 GloFAS · Open-Meteo · Updated ${new Date().toLocaleTimeString()}
-        </div>
-      `;
-    }
-
-    // Refresh every 30 minutes
-    setTimeout(fetchFloodData, 30 * 60 * 1000);
-
-  } catch (err) {
-    console.error('Flood data fetch failed:', err);
-    chip.textContent = '⚠ Flood Data Unavailable';
-    if (panel) panel.innerHTML = `<div class="section-label">🌊 Live Flood Intelligence</div>
-      <div style="color:var(--text-dim);font-size:12px;padding:8px;">Could not load live data. Showing estimated zones.</div>`;
-  }
-}
 
 // ── GPS TRACKING ──
 let tracking = false;
@@ -1112,10 +956,72 @@ function flyToFreetown() {
   map.flyTo(FREETOWN, 14, { animate: true, duration: 1 });
 }
 
-// ── SUBMIT REPORT (saves to Supabase) ──
+// ── SUPABASE CONFIG (no library needed — uses fetch directly) ──
+const SB_URL = 'https://uafjqmoybxnfnaoclvzx.supabase.co/rest/v1';
+const SB_KEY = 'sb_publishable_EifKzVYKGd9hTJA--eIFEQ_UF4fH70t';
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY
+};
+
+// ── LOAD SAVED REPORTS FROM SUPABASE ──
+async function loadReports() {
+  try {
+    const res = await fetch(`${SB_URL}/reports?order=created_at.desc&limit=20`, { headers: SB_HEADERS });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || data.length === 0) return;
+    document.getElementById('reports-list').innerHTML = '';
+    reportCount = 7 + data.length;
+    document.getElementById('report-count').textContent = reportCount;
+    data.forEach(r => addReportToUI(r));
+  } catch(e) { console.warn('Could not load reports:', e); }
+}
+
+// ── ADD REPORT TO SIDEBAR + MAP ──
+function addReportToUI(r, prepend = false) {
+  const badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
+  const labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH ACCESS BLOCKED' };
+  const age = r.created_at ? timeAgo(r.created_at) : 'Just now';
+  const el = document.createElement('div');
+  el.className = 'report-item';
+  el.innerHTML = `
+    <div class="report-item-top">
+      <span class="report-badge ${badgeMap[r.type]||'badge-amber'}">${labelMap[r.type]||r.type}</span>
+      <span class="report-time">${age}</span>
+    </div>
+    <div>${r.location}</div>
+    <div class="report-loc">📍 Community report${r.detail ? ' · '+r.detail.slice(0,40) : ''}</div>
+  `;
+  const list = document.getElementById('reports-list');
+  prepend ? list.insertBefore(el, list.firstChild) : list.appendChild(el);
+  // map pin
+  const colors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868', health:'#d63a2f' };
+  const c = map.getCenter();
+  const icon = L.divIcon({
+    html:`<div style="background:${colors[r.type]||'#e8a020'};color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">${r.location}</div>`,
+    className:'', iconAnchor:[0,0]
+  });
+  L.marker([c.lat+(Math.random()-.5)*.005, c.lng+(Math.random()-.5)*.005], {icon})
+    .bindPopup(`<b>${(labelMap[r.type]||r.type).toUpperCase()}</b><br>${r.location}`)
+    .addTo(reportsLayer);
+  if (!map.hasLayer(reportsLayer)) map.addLayer(reportsLayer);
+}
+
+// ── TIME AGO ──
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)} min ago`;
+  if (s < 86400) return `${Math.floor(s/3600)} hr ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+// ── SUBMIT REPORT ──
 async function submitReport() {
-  const loc  = document.getElementById('r-location').value.trim();
-  const type = document.getElementById('r-type').value;
+  const loc    = document.getElementById('r-location').value.trim();
+  const type   = document.getElementById('r-type').value;
   const detail = document.getElementById('r-detail').value.trim();
   if (!loc || !type) { showToast('Please fill in location and condition type'); return; }
 
@@ -1123,108 +1029,37 @@ async function submitReport() {
   btn.textContent = 'Saving...';
   btn.disabled = true;
 
-  // Save to Supabase
-  const { error } = await db.from('reports').insert({ location: loc, type, detail });
+  try {
+    const res = await fetch(`${SB_URL}/reports`, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ location: loc, type, detail })
+    });
+    if (!res.ok) throw new Error('Save failed');
+    addReportToUI({ location: loc, type, detail, created_at: new Date().toISOString() }, true);
+    reportCount++;
+    document.getElementById('report-count').textContent = reportCount;
+    document.getElementById('r-location').value = '';
+    document.getElementById('r-type').value = '';
+    document.getElementById('r-detail').value = '';
+    showToast('✅ Report saved — thank you!');
+    // Emergency banner for blocked roads
+    if (type === 'blocked' || type === 'health') {
+      const banner = document.getElementById('emergency-banner');
+      document.getElementById('emergency-text').innerHTML =
+        `<strong>🚨 ROUTE BLOCKED:</strong> "${loc}" — avoid this route, seek an alternative`;
+      banner.style.display = 'flex';
+      setTimeout(() => banner.style.display = 'none', 12000);
+    }
+  } catch(e) {
+    showToast('⚠️ Could not save — check your connection');
+  }
+
   btn.textContent = '📤 Submit Report';
   btn.disabled = false;
-
-  if (error) {
-    showToast('⚠️ Could not save report. Please try again.');
-    console.error(error);
-    return;
-  }
-
-  // Update UI
-  addReportToUI({ location: loc, type, detail, created_at: new Date().toISOString() }, true);
-  reportCount++;
-  document.getElementById('report-count').textContent = reportCount;
-
-  document.getElementById('r-location').value = '';
-  document.getElementById('r-type').value = '';
-  document.getElementById('r-detail').value = '';
-
-  showToast('✅ Report saved to database — thank you!');
-
-  // Show emergency banner if road is blocked
-  if (type === 'blocked' || type === 'health') {
-    const banner = document.getElementById('emergency-banner');
-    document.getElementById('emergency-text').innerHTML =
-      `<strong>🚨 NEW BLOCK REPORTED:</strong> "${loc}" — avoid this route, seek an alternative`;
-    banner.classList.add('show');
-    setTimeout(() => banner.classList.remove('show'), 12000);
-  }
 }
 
-// ── ADD REPORT TO SIDEBAR + MAP ──
-function addReportToUI(r, prepend = false) {
-  const badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
-  const labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH ACCESS BLOCKED' };
-
-  const age = r.created_at ? timeAgo(r.created_at) : 'Just now';
-  const el = document.createElement('div');
-  el.className = 'report-item';
-  el.innerHTML = `
-    <div class="report-item-top">
-      <span class="report-badge ${badgeMap[r.type] || 'badge-amber'}">${labelMap[r.type] || r.type.toUpperCase()}</span>
-      <span class="report-time">${age}</span>
-    </div>
-    <div>${r.location}</div>
-    <div class="report-loc">📍 Community report${r.detail ? ' · ' + r.detail.slice(0,40) : ''}</div>
-  `;
-  const list = document.getElementById('reports-list');
-  if (prepend) list.insertBefore(el, list.firstChild);
-  else list.appendChild(el);
-
-  // Add map pin
-  const colors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868', health:'#d63a2f' };
-  const center = map.getCenter();
-  const icon = L.divIcon({
-    html: `<div style="background:${colors[r.type]||'#e8a020'};color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">${r.location}</div>`,
-    className:'', iconAnchor:[0,0]
-  });
-  L.marker([center.lat + (Math.random()-.5)*.005, center.lng + (Math.random()-.5)*.005], { icon })
-    .bindPopup(`<b>${(labelMap[r.type]||r.type).toUpperCase()}</b><br>${r.location}`)
-    .addTo(reportsLayer);
-  if (!map.hasLayer(reportsLayer)) map.addLayer(reportsLayer);
-}
-
-// ── LOAD SAVED REPORTS FROM SUPABASE ──
-async function loadReports() {
-  const { data, error } = await db
-    .from('reports')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
-
-  if (error) { console.error('Load error:', error); return; }
-  if (!data || data.length === 0) return;
-
-  // Clear placeholder items
-  document.getElementById('reports-list').innerHTML = '';
-  reportCount = 7 + data.length;
-  document.getElementById('report-count').textContent = reportCount;
-  const analyticsEl = document.getElementById('analytics-report-count');
-  if (analyticsEl) analyticsEl.textContent = data.length;
-
-  data.forEach(r => addReportToUI(r, false));
-}
-
-// ── TIME AGO HELPER ──
-function timeAgo(iso) {
-  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (diff < 60)  return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
-  if (diff < 86400) return `${Math.floor(diff/3600)} hr ago`;
-  return `${Math.floor(diff/86400)}d ago`;
-}
-
-// Load reports on startup
-window.addEventListener('load', () => {
-  loadReports();
-  fetchFloodData();
-});
-
-
+window.addEventListener('load', loadReports);
 
 // ── TAB SWITCHING ──
 function setTab(btn, tab) {
