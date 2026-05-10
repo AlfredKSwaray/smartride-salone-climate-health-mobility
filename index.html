@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -712,6 +715,11 @@
 <div id="toast"></div>
 
 <script>
+// ── SUPABASE INIT ──
+const SUPABASE_URL = 'https://uafjqmoybxnfnaoclvzx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_EifKzVYKGd9hTJA--eIFEQ_UF4fH70t';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ── MAP SETUP ──
 const FREETOWN = [8.4657, -13.2317];
 
@@ -903,29 +911,30 @@ function flyToFreetown() {
   map.flyTo(FREETOWN, 14, { animate: true, duration: 1 });
 }
 
-// ── SUBMIT REPORT ──
-function submitReport() {
-  const loc = document.getElementById('r-location').value.trim();
+// ── SUBMIT REPORT (saves to Supabase) ──
+async function submitReport() {
+  const loc  = document.getElementById('r-location').value.trim();
   const type = document.getElementById('r-type').value;
   const detail = document.getElementById('r-detail').value.trim();
   if (!loc || !type) { showToast('Please fill in location and condition type'); return; }
 
-  const badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
-  const labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH ACCESS BLOCKED' };
-  const el = document.createElement('div');
-  el.className = 'report-item';
-  el.style.animation = 'fadeIn .4s';
-  el.innerHTML = `
-    <div class="report-item-top">
-      <span class="report-badge ${badgeMap[type]}">${labelMap[type]}</span>
-      <span class="report-time">Just now</span>
-    </div>
-    <div>${loc}</div>
-    <div class="report-loc">📍 Community report${detail ? ' · ' + detail.slice(0,40) : ''}</div>
-  `;
-  const list = document.getElementById('reports-list');
-  list.insertBefore(el, list.firstChild);
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
 
+  // Save to Supabase
+  const { error } = await db.from('reports').insert({ location: loc, type, detail });
+  btn.textContent = '📤 Submit Report';
+  btn.disabled = false;
+
+  if (error) {
+    showToast('⚠️ Could not save report. Please try again.');
+    console.error(error);
+    return;
+  }
+
+  // Update UI
+  addReportToUI({ location: loc, type, detail, created_at: new Date().toISOString() }, true);
   reportCount++;
   document.getElementById('report-count').textContent = reportCount;
 
@@ -933,20 +942,74 @@ function submitReport() {
   document.getElementById('r-type').value = '';
   document.getElementById('r-detail').value = '';
 
-  showToast('✅ Report submitted — thank you!');
+  showToast('✅ Report saved to database — thank you!');
+}
 
-  // add pin to map
+// ── ADD REPORT TO SIDEBAR + MAP ──
+function addReportToUI(r, prepend = false) {
+  const badgeMap = { blocked:'badge-red', caution:'badge-amber', clear:'badge-green', health:'badge-red' };
+  const labelMap = { blocked:'BLOCKED', caution:'CAUTION', clear:'CLEAR', health:'HEALTH ACCESS BLOCKED' };
+
+  const age = r.created_at ? timeAgo(r.created_at) : 'Just now';
+  const el = document.createElement('div');
+  el.className = 'report-item';
+  el.innerHTML = `
+    <div class="report-item-top">
+      <span class="report-badge ${badgeMap[r.type] || 'badge-amber'}">${labelMap[r.type] || r.type.toUpperCase()}</span>
+      <span class="report-time">${age}</span>
+    </div>
+    <div>${r.location}</div>
+    <div class="report-loc">📍 Community report${r.detail ? ' · ' + r.detail.slice(0,40) : ''}</div>
+  `;
+  const list = document.getElementById('reports-list');
+  if (prepend) list.insertBefore(el, list.firstChild);
+  else list.appendChild(el);
+
+  // Add map pin
   const colors = { blocked:'#d63a2f', caution:'#e8a020', clear:'#25a868', health:'#d63a2f' };
   const center = map.getCenter();
   const icon = L.divIcon({
-    html: `<div style="background:${colors[type]};color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">${loc}</div>`,
+    html: `<div style="background:${colors[r.type]||'#e8a020'};color:white;padding:3px 8px;border-radius:10px;font-size:11px;font-family:DM Sans,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.4);">${r.location}</div>`,
     className:'', iconAnchor:[0,0]
   });
   L.marker([center.lat + (Math.random()-.5)*.005, center.lng + (Math.random()-.5)*.005], { icon })
-    .bindPopup(`<b>${labelMap[type]}</b><br>${loc}`)
+    .bindPopup(`<b>${(labelMap[r.type]||r.type).toUpperCase()}</b><br>${r.location}`)
     .addTo(reportsLayer);
   if (!map.hasLayer(reportsLayer)) map.addLayer(reportsLayer);
 }
+
+// ── LOAD SAVED REPORTS FROM SUPABASE ──
+async function loadReports() {
+  const { data, error } = await db
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) { console.error('Load error:', error); return; }
+  if (!data || data.length === 0) return;
+
+  // Clear placeholder items
+  document.getElementById('reports-list').innerHTML = '';
+  reportCount = 7 + data.length;
+  document.getElementById('report-count').textContent = reportCount;
+
+  data.forEach(r => addReportToUI(r, false));
+}
+
+// ── TIME AGO HELPER ──
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60)  return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} hr ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+// Load reports on startup
+window.addEventListener('load', loadReports);
+
+
 
 // ── TAB SWITCHING ──
 function setTab(btn, tab) {
