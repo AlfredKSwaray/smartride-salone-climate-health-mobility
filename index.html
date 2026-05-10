@@ -403,10 +403,11 @@
     .map-overlay {
       position: absolute;
       top: 12px; right: 12px;
-      z-index: 500;
+      z-index: 1000;
       display: flex;
       flex-direction: column;
       gap: 6px;
+      pointer-events: all;
     }
     .overlay-btn {
       background: var(--surface);
@@ -495,10 +496,10 @@
       <button class="control-btn active" id="btn-flood" onclick="toggleLayer('flood',this)">
         <span class="icon">💧</span> Flood Risk Zones
       </button>
-      <button class="control-btn active" id="btn-health" onclick="toggleLayer('health',this)">
+      <button class="control-btn active" id="btn-health" onclick="toggleLayer('health',this); showRightPanel('health')">
         <span class="icon">🏥</span> Health Facilities
       </button>
-      <button class="control-btn" id="btn-reports" onclick="toggleLayer('reports',this)">
+      <button class="control-btn" id="btn-reports" onclick="toggleLayer('reports',this); showRightPanel('reports')">
         <span class="icon">📍</span> Community Reports
       </button>
     </div>
@@ -566,6 +567,82 @@
         <span id="gps-label">Start Route Tracking</span>
       </button>
       <div id="gps-status" style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:8px;min-height:16px;"></div>
+    </div>
+
+    <!-- HEALTH FACILITIES PANEL (shown when clicking Health Facilities) -->
+    <div id="panel-health" style="display:none;padding:16px;border-bottom:1px solid var(--border);">
+      <div class="section-label">🏥 Health Facilities Status</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Tap a facility on the map for route info</div>
+      <div class="route-card">
+        <div class="route-card-top">
+          <div class="route-name">Connaught Hospital</div>
+          <span class="report-badge badge-amber">CAUTION</span>
+        </div>
+        <div class="route-meta">📍 Central Freetown · General hospital</div>
+        <div class="route-meta">Route delays due to flooding on Siaka Stevens St</div>
+      </div>
+      <div class="route-card">
+        <div class="route-card-top">
+          <div class="route-name">Ola During Children's</div>
+          <span class="report-badge badge-green">CLEAR</span>
+        </div>
+        <div class="route-meta">📍 West Freetown · Children's hospital</div>
+        <div class="route-meta">Via Wilkinson Rd · ETA ~12 min · Safe to travel</div>
+      </div>
+      <div class="route-card">
+        <div class="route-card-top">
+          <div class="route-name">Princess Christian MCH</div>
+          <span class="report-badge badge-red">BLOCKED</span>
+        </div>
+        <div class="route-meta">📍 East Freetown · Maternal & child health</div>
+        <div class="route-meta">⚠️ Kissy Rd flooded — use alternative route</div>
+      </div>
+      <div class="route-card">
+        <div class="route-card-top">
+          <div class="route-name">Kissy Mental Hospital</div>
+          <span class="report-badge badge-green">CLEAR</span>
+        </div>
+        <div class="route-meta">📍 Kissy · Mental health facility</div>
+        <div class="route-meta">Access currently clear · ETA ~20 min</div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY REPORTS PANEL (shown when clicking Community Reports) -->
+    <div id="panel-community" style="display:none;padding:16px;border-bottom:1px solid var(--border);">
+      <div class="section-label">📍 Live Community Reports</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Reports submitted by community members</div>
+      <div class="report-item">
+        <div class="report-item-top">
+          <span class="report-badge badge-red">BLOCKED</span>
+          <span class="report-time">8 min ago</span>
+        </div>
+        <div>Wellington Street near market</div>
+        <div class="report-loc">📍 East Freetown · Flash flooding · Avoid</div>
+      </div>
+      <div class="report-item">
+        <div class="report-item-top">
+          <span class="report-badge badge-amber">CAUTION</span>
+          <span class="report-time">22 min ago</span>
+        </div>
+        <div>Congo Cross Bridge</div>
+        <div class="report-loc">📍 West Freetown · Road damage · Use caution</div>
+      </div>
+      <div class="report-item">
+        <div class="report-item-top">
+          <span class="report-badge badge-green">CLEAR</span>
+          <span class="report-time">41 min ago</span>
+        </div>
+        <div>Lumley Beach Road</div>
+        <div class="report-loc">📍 West End · Confirmed passable · Safe</div>
+      </div>
+      <div class="report-item">
+        <div class="report-item-top">
+          <span class="report-badge badge-red">BLOCKED</span>
+          <span class="report-time">1 hr ago</span>
+        </div>
+        <div>Kissy Road main junction</div>
+        <div class="report-loc">📍 Kissy · Flash flood · Seek alternative</div>
+      </div>
     </div>
 
     <div style="padding:16px; border-bottom:1px solid var(--border);">
@@ -1293,6 +1370,16 @@ function showCorridor(title, risk, color, body, alt) {
   document.getElementById('corr-alt').textContent = alt;
   document.getElementById('corridor-detail').style.display = 'block';
   document.getElementById('corridor-detail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── RIGHT PANEL SWITCHER ──
+function showRightPanel(name) {
+  // hide both panels first
+  document.getElementById('panel-health').style.display = 'none';
+  document.getElementById('panel-community').style.display = 'none';
+  // show the one clicked — toggle if already visible
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
 // ── TAB SWITCHING ──
