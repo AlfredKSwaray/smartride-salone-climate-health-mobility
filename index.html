@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -376,6 +377,28 @@
     }
     #toast.show { opacity: 1; }
 
+    /* emergency alert banner */
+    .emergency-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: rgba(214,58,47,.12);
+      border-bottom: 1px solid rgba(214,58,47,.4);
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #f07870;
+      flex-shrink: 0;
+      animation: slideDown .4s ease;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .emergency-banner.show { display: flex; }
+    .emergency-banner strong { color: var(--text); }
+    .banner-close { margin-left:auto; cursor:pointer; opacity:.6; font-size:16px; }
+    .banner-close:hover { opacity:1; }
+
     /* scrollbar for right */
     .right-panel::-webkit-scrollbar { width: 4px; }
 
@@ -424,9 +447,16 @@
   </div>
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>LIVE · Freetown</div>
-    <div class="weather-chip">⚠ Heavy Rain · Kissy Rd BLOCKED</div>
+    <div class="weather-chip" id="flood-alert-chip">⏳ Fetching flood data...</div>
   </div>
 </header>
+
+<!-- ── EMERGENCY ALERT BANNER ── -->
+<div class="emergency-banner" id="emergency-banner">
+  <span>🚨</span>
+  <span id="emergency-text"><strong>ROUTE BLOCKED:</strong> Kissy Road flooded — alternative via Wilkinson Rd recommended</span>
+  <span class="banner-close" onclick="document.getElementById('emergency-banner').classList.remove('show')">✕</span>
+</div>
 
 <!-- ── MAIN ── -->
 <div class="main" id="main-map">
@@ -474,6 +504,11 @@
       <button class="control-btn" id="btn-reports" onclick="toggleLayer('reports',this)">
         <span class="icon">📍</span> Community Reports
       </button>
+    </div>
+
+    <div class="sidebar-section" id="flood-data-panel">
+      <div class="section-label">🌊 Live Flood Intelligence</div>
+      <div style="color:var(--text-dim);font-size:12px;padding:4px 0;">Fetching real river discharge data...</div>
     </div>
 
     <div class="sidebar-section" style="flex:1;">
@@ -785,16 +820,18 @@ const map = L.map('map', { zoomControl: true, layers: [streetTiles] }).setView(F
 
 // ── FLOOD ZONES (approximate polygons near Freetown low areas) ──
 const floodZones = L.layerGroup();
+const floodPolygons = [];
 const floodData = [
   { coords: [[8.455, -13.215], [8.460, -13.205], [8.453, -13.200], [8.447, -13.210]], label: 'Kissy Flood Zone' },
   { coords: [[8.480, -13.245], [8.485, -13.235], [8.478, -13.228], [8.472, -13.240]], label: 'East End Lowland' },
   { coords: [[8.440, -13.230], [8.445, -13.218], [8.436, -13.215], [8.432, -13.225]], label: 'Waterfront Risk Area' },
 ];
 floodData.forEach(f => {
-  L.polygon(f.coords, {
+  const poly = L.polygon(f.coords, {
     color: '#2066b4', weight: 1.5,
     fillColor: '#2066b4', fillOpacity: 0.22
-  }).bindPopup(`<b>⚠️ ${f.label}</b><br>High flood risk during heavy rainfall`).addTo(floodZones);
+  }).bindPopup(`<b>⚠️ ${f.label}</b><br>Loading real flood data...`).addTo(floodZones);
+  floodPolygons.push(poly);
 });
 floodZones.addTo(map);
 
@@ -850,6 +887,121 @@ routes.forEach(r => {
     .bindPopup(`<b>${r.label}</b>`)
     .addTo(map);
 });
+
+// ── REAL FLOOD DATA (Open-Meteo GloFAS API) ──
+// River monitoring points around Freetown flood-prone corridors
+const FLOOD_POINTS = [
+  { name: 'Kissy Flood Zone',      lat: 8.453,  lng: -13.207, zoneIndex: 0 },
+  { name: 'East End Lowland',      lat: 8.480,  lng: -13.237, zoneIndex: 1 },
+  { name: 'Waterfront Risk Area',  lat: 8.440,  lng: -13.225, zoneIndex: 2 },
+];
+
+// Discharge thresholds (m³/s) for Sierra Leone small rivers
+const THRESHOLDS = { low: 15, medium: 40, high: 80 };
+
+let floodPolygons = []; // store polygon refs for dynamic recoloring
+
+function getRiskLevel(discharge) {
+  if (discharge === null || discharge === undefined) return 'unknown';
+  if (discharge >= THRESHOLDS.high)   return 'critical';
+  if (discharge >= THRESHOLDS.medium) return 'high';
+  if (discharge >= THRESHOLDS.low)    return 'moderate';
+  return 'low';
+}
+
+function getRiskColor(level) {
+  return { critical:'#d63a2f', high:'#e8a020', moderate:'#2066b4', low:'#25a868', unknown:'#7a9a83' }[level];
+}
+
+function getRiskOpacity(level) {
+  return { critical:0.45, high:0.35, moderate:0.22, low:0.12, unknown:0.15 }[level];
+}
+
+async function fetchFloodData() {
+  const chip = document.getElementById('flood-alert-chip');
+  const panel = document.getElementById('flood-data-panel');
+
+  try {
+    const results = await Promise.all(FLOOD_POINTS.map(async (pt) => {
+      const url = `https://flood-api.open-meteo.com/v1/flood?latitude=${pt.lat}&longitude=${pt.lng}&daily=river_discharge&forecast_days=3`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const discharge = data?.daily?.river_discharge?.[0] ?? null;
+      const risk = getRiskLevel(discharge);
+      return { ...pt, discharge, risk };
+    }));
+
+    // Update flood zone polygon colors dynamically
+    results.forEach((pt, i) => {
+      if (floodPolygons[i]) {
+        floodPolygons[i].setStyle({
+          color: getRiskColor(pt.risk),
+          fillColor: getRiskColor(pt.risk),
+          fillOpacity: getRiskOpacity(pt.risk),
+          weight: pt.risk === 'critical' ? 2.5 : 1.5,
+        });
+        floodPolygons[i].bindPopup(
+          `<b>⚠️ ${pt.name}</b><br>
+           River discharge: <b>${pt.discharge !== null ? pt.discharge.toFixed(1) + ' m³/s' : 'No data'}</b><br>
+           Flood risk: <b style="color:${getRiskColor(pt.risk)}">${pt.risk.toUpperCase()}</b><br>
+           <small>Source: GloFAS via Open-Meteo · Live</small>`
+        );
+      }
+    });
+
+    // Update header alert chip
+    const maxRisk = results.reduce((max, pt) => {
+      const order = ['unknown','low','moderate','high','critical'];
+      return order.indexOf(pt.risk) > order.indexOf(max) ? pt.risk : max;
+    }, 'low');
+
+    const chipMessages = {
+      critical: '🔴 CRITICAL Flood Risk',
+      high:     '🟠 HIGH Flood Risk',
+      moderate: '🟡 Elevated River Levels',
+      low:      '🟢 Normal River Levels',
+      unknown:  '⚪ Flood Data Unavailable',
+    };
+    chip.textContent = chipMessages[maxRisk];
+    chip.style.background = `${getRiskColor(maxRisk)}22`;
+    chip.style.borderColor = `${getRiskColor(maxRisk)}55`;
+    chip.style.color = getRiskColor(maxRisk);
+
+    // Update sidebar flood panel
+    if (panel) {
+      panel.innerHTML = `
+        <div class="section-label">🌊 Live Flood Intelligence</div>
+        ${results.map(pt => `
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:12px;font-weight:600;">${pt.name}</span>
+              <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;
+                background:${getRiskColor(pt.risk)}22;color:${getRiskColor(pt.risk)};
+                border:1px solid ${getRiskColor(pt.risk)}44;">
+                ${pt.risk.toUpperCase()}
+              </span>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);">
+              ${pt.discharge !== null ? pt.discharge.toFixed(1) + ' m³/s discharge' : 'No river data at this point'}
+            </div>
+          </div>
+        `).join('')}
+        <div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:4px;">
+          📡 GloFAS · Open-Meteo · Updated ${new Date().toLocaleTimeString()}
+        </div>
+      `;
+    }
+
+    // Refresh every 30 minutes
+    setTimeout(fetchFloodData, 30 * 60 * 1000);
+
+  } catch (err) {
+    console.error('Flood data fetch failed:', err);
+    chip.textContent = '⚠ Flood Data Unavailable';
+    if (panel) panel.innerHTML = `<div class="section-label">🌊 Live Flood Intelligence</div>
+      <div style="color:var(--text-dim);font-size:12px;padding:8px;">Could not load live data. Showing estimated zones.</div>`;
+  }
+}
 
 // ── GPS TRACKING ──
 let tracking = false;
@@ -992,6 +1144,15 @@ async function submitReport() {
   document.getElementById('r-detail').value = '';
 
   showToast('✅ Report saved to database — thank you!');
+
+  // Show emergency banner if road is blocked
+  if (type === 'blocked' || type === 'health') {
+    const banner = document.getElementById('emergency-banner');
+    document.getElementById('emergency-text').innerHTML =
+      `<strong>🚨 NEW BLOCK REPORTED:</strong> "${loc}" — avoid this route, seek an alternative`;
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 12000);
+  }
 }
 
 // ── ADD REPORT TO SIDEBAR + MAP ──
@@ -1058,7 +1219,10 @@ function timeAgo(iso) {
 }
 
 // Load reports on startup
-window.addEventListener('load', loadReports);
+window.addEventListener('load', () => {
+  loadReports();
+  fetchFloodData();
+});
 
 
 
