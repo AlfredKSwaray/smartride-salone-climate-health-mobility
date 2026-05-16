@@ -1236,6 +1236,7 @@ function toggleLayer(name, btn) {
 let usingSatellite = false;
 function toggleSatellite(btn) {
   if (!map) return;
+  if (!usingSatellite) {
     map.removeLayer(streetTiles);
     satelliteTiles.addTo(map);
     btn.classList.add('active');
