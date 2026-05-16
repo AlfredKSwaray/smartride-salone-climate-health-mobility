@@ -426,6 +426,14 @@
     .map-wrap {
       flex: 1;
       position: relative;
+      min-height: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -1388,6 +1396,7 @@ function setTab(btn, tab) {
   document.getElementById('main-map').style.display = tab === 'map' ? 'flex' : 'none';
   document.getElementById('main-analytics').style.display = tab === 'analytics' ? 'flex' : 'none';
   document.getElementById('main-about').style.display = tab === 'about' ? 'flex' : 'none';
+  if (tab === 'map') setTimeout(() => map.invalidateSize(), 50);
   if (tab === 'map') setTimeout(() => map.invalidateSize(), 50);
 }
 
