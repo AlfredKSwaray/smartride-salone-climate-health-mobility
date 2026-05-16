@@ -252,7 +252,7 @@
     }
 
     /* Leaflet dark override */
-    .leaflet-tile { filter: brightness(.75) saturate(.7) hue-rotate(150deg); }
+    .leaflet-tile { filter: none; }
     .leaflet-control-zoom a {
       background: var(--surface) !important;
       color: var(--text) !important;
@@ -944,9 +944,10 @@ const mapEl = document.getElementById('map');
 mapEl.style.width = '100%';
 mapEl.style.height = (window.innerHeight - 48) + 'px';
 
-const streetTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors',
-  maxZoom: 18
+const streetTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
 });
 const satelliteTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles © Esri',
