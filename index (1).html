@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -247,7 +248,8 @@
 
     /* ── MAP ── */
     #map {
-      flex: 1;
+      width: 100%;
+      height: calc(100vh - 48px);
       z-index: 1;
     }
 
@@ -428,7 +430,7 @@
       position: relative;
       overflow: hidden;
     }
-    #map { display: block; }
+    #map { display: block; width: 100%; height: calc(100vh - 48px); }
   </style>
 </head>
 <body>
@@ -937,12 +939,6 @@ async function dbSelect(table, params = '') {
 
 // ── MAP SETUP ──
 const FREETOWN = [8.4657, -13.2317];
-
-// Set explicit PIXEL height before Leaflet initializes
-// height:100% does not work when parent uses flex:1
-const mapEl = document.getElementById('map');
-mapEl.style.width = '100%';
-mapEl.style.height = (window.innerHeight - 48) + 'px';
 
 const streetTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap © CARTO',
